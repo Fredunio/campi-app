@@ -1,0 +1,6 @@
+@tailwind components;
+@tailwind utilities;
+
+ion-icon {
+  --ionicon-stroke-width: 3rem;
+}

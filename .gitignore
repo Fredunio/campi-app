@@ -12,6 +12,8 @@
 /dist
 
 # misc
+.env
+.env.dev
 .DS_Store
 .env.local
 .env.development.local
