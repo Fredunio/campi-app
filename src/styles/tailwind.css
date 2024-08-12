@@ -2,5 +2,24 @@
 @tailwind utilities;
 
 ion-icon {
-  --ionicon-stroke-width: 3rem;
+  --ionicon-stroke-width: 40px;
+}
+
+@layer components {
+  .subheader-btn {
+    @apply p-0 px-2 capitalize rounded-sm bg-transparent;
+    /* border-color: var(--ion-color-primary-contrast-rgb); */
+  }
+
+  .subheader-btn-activated {
+    @apply border-transparent;
+    background-color: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+  }
+}
+
+@layer utilities {
+  .error-border {
+    @apply border-1 border-[var(--highlight-color-invalid)] rounded-[var(--border-radius)] border-solid;
+  }
 }

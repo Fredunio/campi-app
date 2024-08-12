@@ -11,31 +11,18 @@ import {
   IonPage,
   IonText,
 } from "@ionic/react";
-import MainHeader from "../components/Layout/Headers/MainHeader/MainHeader";
 import { Capacitor } from "@capacitor/core";
 import clsx from "clsx";
 import { useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabaseClient } from "../database/client";
-
-async function signInWithFacebook() {
-  const { data, error } = await supabaseClient.auth.signInWithOAuth({
-    provider: "facebook",
-  });
-}
-
-async function signInWithGoogle() {
-  const { data, error } = await supabaseClient.auth.signInWithOAuth({
-    provider: "google",
-  });
-}
-
-async function signInWithDiscord() {
-  const { data, error } = await supabaseClient.auth.signInWithOAuth({
-    provider: "discord",
-  });
-}
+import SignupHeader from "../components/Layout/Headers/SignupHeader/SignupHeader";
+import {
+  signInWithDiscord,
+  signInWithFacebook,
+  signInWithGoogle,
+} from "../lib/auth";
 
 const isNative = Capacitor.isNativePlatform();
 
@@ -98,14 +85,14 @@ const SignUp: React.FC = () => {
 
   return (
     <IonPage id="login-page">
-      <IonContent className="">
-        <MainHeader />
+      <SignupHeader />
+      <IonContent fullscreen>
         <IonCard
           className={clsx(
             `px-12 bg-transparent py-4 m-0 gap-0 lg:w-96 lg:px-0 lg:py-0 lg:flex lg:flex-col lg:items-center lg:justify-center lg:mx-auto lg:mt-8`
           )}
         >
-          <IonCardHeader class="text-center mb-8 ">
+          <IonCardHeader class="text-center mb-4 ">
             <IonCardTitle class="text-4xl font-bold">Campi 🏕️</IonCardTitle>
             <IonCardSubtitle class="text-lg">Welcome back!</IonCardSubtitle>
           </IonCardHeader>

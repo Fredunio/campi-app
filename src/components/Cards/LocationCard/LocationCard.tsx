@@ -1,5 +1,6 @@
 import {
   IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
   IonCardHeader,
@@ -35,17 +36,27 @@ import {
 export default function LocationCard() {
   return (
     <IonCard className="mx-0">
-      <img
-        alt="Silhouette of mountains"
-        src="https://ionicframework.com/docs/img/demos/card-media.png"
-      />
+      <div className="relative">
+        <img
+          alt="Silhouette of mountains"
+          src="https://ionicframework.com/docs/img/demos/card-media.png"
+        />
+        <div className="absolute right-0 px-1 bottom-1">
+          <IonButton color={"dark"} shape="round" fill="clear" slot="start">
+            <IonIcon slot="icon-only" icon={shareSocialOutline} />
+          </IonButton>
+          <IonButton color={"dark"} shape="round" fill="clear">
+            <IonIcon slot="icon-only" icon={heartOutline} />
+          </IonButton>
+        </div>
+      </div>
 
       <IonCardHeader>
         <IonCardTitle color={"dark"} className="font-semibold">
           A Cool Camping Spot Near You
         </IonCardTitle>
         <IonCardSubtitle>
-          <div className="flex flex-wrap items-center -mt-1">
+          <div className="flex flex-wrap items-center -mx-2 -mt-1">
             {/* icons that show what event/location */}
             {/* TODO: make it so when it is more than X, it shows X icons and says e.g +4 */}
             <IonButton shape="round" size="small" fill="default" className="">
@@ -120,14 +131,6 @@ export default function LocationCard() {
           ))}
         </div>
       </IonCardContent>
-      <IonToolbar className="px-2">
-        <IonButton shape="round" fill="default" slot="start">
-          <IonIcon slot="icon-only" icon={shareSocialOutline} />
-        </IonButton>
-        <IonButton shape="round" fill="default" slot="start">
-          <IonIcon slot="icon-only" icon={heartOutline} />
-        </IonButton>
-      </IonToolbar>
     </IonCard>
   );
 }

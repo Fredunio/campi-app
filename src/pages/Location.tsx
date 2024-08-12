@@ -6,13 +6,13 @@ import {
   IonToolbar,
 } from "@ionic/react";
 
-const NewLocation: React.FC = () => {
+const Location: React.FC = () => {
   return (
     <IonPage>
-      <IonContent fullscreen>
-        <IonHeader collapse="condense">
+      <IonContent>
+        <IonHeader>
           <IonToolbar>
-            <IonTitle size="large">Add New Location</IonTitle>
+            <IonTitle size="large">Location</IonTitle>
           </IonToolbar>
         </IonHeader>
       </IonContent>
@@ -20,4 +20,4 @@ const NewLocation: React.FC = () => {
   );
 };
 
-export default NewLocation;
+export default Location;

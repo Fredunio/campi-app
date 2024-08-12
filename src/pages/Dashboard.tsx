@@ -5,16 +5,15 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
+import DashboardHeader from "../components/Layout/Headers/DashboardHeader/DashboardHeader";
+import HomeHeader from "../components/Layout/Headers/HomeHeader/HomeHeader";
 
 const Dashboard: React.FC = () => {
   return (
     <IonPage>
       <IonContent>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle size="large">Dashboard</IonTitle>
-          </IonToolbar>
-        </IonHeader>
+        {/* <DashboardHeader /> */}
+        <HomeHeader />
       </IonContent>
     </IonPage>
   );

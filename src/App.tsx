@@ -1,18 +1,12 @@
 import { Route } from "react-router-dom";
 import {
   IonApp,
-  IonAvatar,
-  IonIcon,
-  IonLabel,
   IonRouterOutlet,
-  IonTabBar,
-  IonTabButton,
   IonTabs,
   setupIonicReact,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { homeOutline, mapOutline, peopleOutline } from "ionicons/icons";
-import NewLocation from "./pages/NewLocation";
+import { homeOutline, journalOutline, mapOutline } from "ionicons/icons";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -51,85 +45,55 @@ import "./styles/variables.css";
 import "./styles/tailwind.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Home from "./pages/Home";
-
-const tabs = [
-  {
-    title: "Home",
-    icon: homeOutline,
-    id: "home-tab",
-    href: "/",
-  },
-  {
-    title: "Maps",
-    icon: mapOutline,
-    id: "map-tab",
-    href: "/maps",
-  },
-  {
-    title: "Groups",
-    icon: peopleOutline,
-    id: "groups-tab",
-    href: "/groups",
-  },
-];
+import AddLocation from "./pages/AddLocation";
+import AddEvent from "./pages/AddEvent";
+import Journal from "./pages/Journal";
+import AuthProvider from "./providers/AuthProvider";
+import NavTabs from "./components/Layout/NavTabs/NavTabs";
+import Router from "./components/Router/Router";
 
 const queryClient = new QueryClient();
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <QueryClientProvider client={queryClient}>
-      <IonReactRouter>
-        {/* <IonHeader>
-        <IonToolbar>
-          <IonTitle>Header Title</IonTitle>
-        </IonToolbar>
-      </IonHeader> */}
-        <IonTabs>
-          <IonRouterOutlet>
-            <Route exact path="/">
-              <Home />
-            </Route>
-            {/* <Route exact path="/search">
-              <Search />
-            </Route> */}
-            <Route exact path="/new">
-              <NewLocation />
-            </Route>
-            <Route path="/dashboard">
-              <Dashboard />
-            </Route>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/signup">
-              <SignUp />;
-            </Route>
-          </IonRouterOutlet>
-          <IonTabBar slot="bottom">
-            {tabs.map((tab) => (
-              <IonTabButton key={tab.id} tab={tab.id} href={tab.href}>
-                <IonIcon aria-hidden="true" icon={tab.icon} />
-                <IonLabel>{tab.title}</IonLabel>
-              </IonTabButton>
-            ))}
-
-            <IonTabButton tab="tab2" href="/dashboard">
-              <IonAvatar className="w-12 h-12">
-                <img
-                  alt="Silhouette of a person's head"
-                  src="https://ionicframework.com/docs/img/demos/avatar.svg"
-                />
-              </IonAvatar>
-              {/* <IonIcon aria-hidden="true" icon={ellipse} /> */}
-              {/* <IonLabel>Dashboard</IonLabel> */}
-            </IonTabButton>
-          </IonTabBar>
-        </IonTabs>
-      </IonReactRouter>
-    </QueryClientProvider>
-  </IonApp>
-);
+const App: React.FC = function () {
+  return (
+    <IonApp>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Router />
+          {/* <IonReactRouter>
+            <IonTabs>
+              <IonRouterOutlet>
+                <Route exact path="/">
+                  <Home />
+                </Route>
+                <Route exact path="/add_location">
+                  <AddLocation />
+                </Route>
+                <Route exact path="/add_event">
+                  <AddEvent />
+                </Route>
+                <Route path="/dashboard">
+                  <Dashboard />
+                </Route>
+                <Route path="/journal">
+                  <Journal />
+                </Route>
+                <Route path="/login">
+                  <Login />
+                </Route>
+                <Route path="/signup">
+                  <SignUp />;
+                </Route>
+              </IonRouterOutlet>
+              <NavTabs />
+            </IonTabs>
+          </IonReactRouter> */}
+        </AuthProvider>
+      </QueryClientProvider>
+    </IonApp>
+  );
+};
 
 export default App;

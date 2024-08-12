@@ -3,13 +3,16 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonIcon,
   IonInput,
   IonItem,
   IonModal,
+  IonSearchbar,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
 import { OverlayEventDetail } from "@ionic/react/dist/types/components/react-component-lib/interfaces";
+import { arrowBackOutline, searchOutline } from "ionicons/icons";
 import React, { useRef, useState } from "react";
 
 export default function SearchModal() {
@@ -37,30 +40,27 @@ export default function SearchModal() {
       onWillDismiss={(ev) => onWillDismiss(ev)}
     >
       <IonHeader>
-        <IonToolbar>
+        <IonToolbar className="">
           <IonButtons slot="start">
             <IonButton onClick={() => modal.current?.dismiss()}>
-              Cancel
+              <IonIcon slot="icon-only" icon={arrowBackOutline} />
             </IonButton>
           </IonButtons>
-          <IonTitle>Welcome</IonTitle>
-          <IonButtons slot="end">
-            <IonButton strong={true} onClick={() => confirm()}>
-              Confirm
-            </IonButton>
-          </IonButtons>
+          <IonTitle>Search</IonTitle>
+        </IonToolbar>
+        <IonToolbar className="">
+          <IonSearchbar showClearButton="always"></IonSearchbar>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
-        <IonItem>
-          <IonInput
-            label="Enter your name"
-            labelPlacement="stacked"
-            ref={input}
-            type="text"
-            placeholder="Your name"
-          />
-        </IonItem>
+        {/* <IonInput className="" fill="outline" placeholder="Search on Campi">
+          <IonIcon
+            slot="start"
+            icon={searchOutline}
+            aria-hidden="true"
+          ></IonIcon>
+        </IonInput> */}
+        <div className="w-4 h-[0.2rem]  bg-white rounded-[0.07rem] mx-auto"></div>
       </IonContent>
     </IonModal>
   );
