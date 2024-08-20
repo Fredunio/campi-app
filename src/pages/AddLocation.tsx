@@ -13,7 +13,17 @@ import {
   IonTextarea,
 } from "@ionic/react";
 import GoBackHeader from "../components/Layout/Headers/GoBackHeader/GoBackHeader";
-import { add, closeCircle, imagesOutline, map } from "ionicons/icons";
+import {
+  add,
+  closeCircle,
+  helpCircleOutline,
+  images,
+  imagesOutline,
+  location,
+  map,
+  trashBin,
+  trashBinOutline,
+} from "ionicons/icons";
 import { useCallback, useState } from "react";
 import FormHeaderDivider from "../components/Layout/FormHeaderDivider/FormHeaderDivider";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -74,8 +84,8 @@ const NewLocationInputsSchema = yup.object().shape({
     }),
   description: yup.string().required(),
   address: yup.string().required(),
-  conditions: yup.array().of(yup.string()).required(),
-  equipment: yup.array().of(yup.string()).required(),
+  conditions: yup.array().of(yup.string()).notRequired(),
+  equipment: yup.array().of(yup.string()).notRequired(),
   tagInput: yup.string().notRequired(),
   tags: yup.array().of(yup.string()).required(),
   visibility: yup.string().oneOf(["public", "private"]).required(),
@@ -186,6 +196,7 @@ const AddLocation: React.FC = () => {
 
   const imagesField = register("images", { required: true });
 
+  const areImages = previewImages && previewImages.length > 0;
   const tags = watch("tags");
   console.log(errors);
 
@@ -259,6 +270,8 @@ const AddLocation: React.FC = () => {
             <IonSelectOption value="3">Size 3</IonSelectOption>
           </IonSelect>
 
+          <FormHeaderDivider>Images</FormHeaderDivider>
+
           <div className="flex flex-col gap-2">
             <input
               multiple={true}
@@ -277,7 +290,7 @@ const AddLocation: React.FC = () => {
               // onClick={() => {
               //   document.getElementById("image-upload")?.click();
               // }}
-              className="w-full flex items-center flex-col gap-4 py-8 px-4 bg-transparent text-[var(--ion-background-color-step-300)] rounded-[4px] border-[var(--ion-background-color-step-300)] border-2 border-dashed"
+              className={`${areImages ? "hidden" : ""} w-full flex items-center flex-col gap-4 py-8 px-4 bg-transparent text-[var(--ion-background-color-step-300)] rounded-[4px] border-[var(--ion-background-color-step-300)] border-2 border-dashed`}
             >
               <IonIcon
                 className="w-12 h-12 "
@@ -287,7 +300,40 @@ const AddLocation: React.FC = () => {
               <p className="m-0">Add Images to the Location</p>
             </label>
           </div>
+
           <FormPreviewImages images={previewImages} removeImage={removeImage} />
+          <div
+            className={`${areImages ? "" : "hidden"} flex items-center gap-2`}
+          >
+            <IonButton
+              fill="outline"
+              color="danger"
+              onClick={() => {
+                setValue("images", []);
+                setPreviewImages([]);
+              }}
+            >
+              <IonIcon slot="icon-only" icon={trashBinOutline} />
+            </IonButton>
+
+            <IonButton
+              onClick={() => {
+                document.getElementById("image-upload")?.click();
+              }}
+              color="dark"
+              className="w-full"
+            >
+              {/* icon to maintain height */}
+              <IonIcon
+                aria-hidden="true"
+                className="hidden"
+                slot="icon-only"
+                icon={trashBinOutline}
+              />
+              Add more
+              <IonIcon slot="end" icon={images} className="ml-2" />
+            </IonButton>
+          </div>
 
           <FormHeaderDivider>Location Details</FormHeaderDivider>
 
@@ -400,7 +446,7 @@ const AddLocation: React.FC = () => {
             name="visibility"
             defaultValue={"public"}
             value={getValues("visibility")}
-            className="flex flex-row items-center gap-10  mt-2 rounded-[4px] border-[var(--ion-background-color-step-300)] border-1 border-solid px-4 py-[18px]"
+            className="flex flex-row items-center gap-10 form-field-group"
           >
             <label className="label-text-wrapper ">
               <div className="label-text">Visibility:</div>
@@ -408,17 +454,40 @@ const AddLocation: React.FC = () => {
 
             <IonRadio
               defaultChecked={true}
+              color={"dark"}
               value="public"
               {...register("visibility")}
             >
               Public
             </IonRadio>
-            <IonRadio {...register("visibility")} value="private">
+            <IonRadio
+              color={"dark"}
+              {...register("visibility")}
+              value="private"
+            >
               Private
             </IonRadio>
           </IonRadioGroup>
 
-          <div className="flex items-center justify-between mt-8">
+          <div className="flex items-center gap-2 pl-2 mt-2">
+            <label className="label-text-wrapper ">
+              <div className="label-text">Are you in the location?</div>
+            </label>
+            <IonButton color={"dark"} shape="round" fill="solid" size="small">
+              Check In
+              <IonIcon slot="end" icon={location} />
+            </IonButton>
+            <IonButton
+              color={"dark"}
+              fill="clear"
+              size="small"
+              className="ml-auto"
+            >
+              <IonIcon slot="icon-only" icon={helpCircleOutline} />
+            </IonButton>
+          </div>
+
+          <div className="flex items-center justify-between mt-8 ">
             <IonButton fill="outline" color={"danger"} className="">
               Cancel
             </IonButton>

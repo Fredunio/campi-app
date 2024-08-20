@@ -18,7 +18,11 @@ export default function FormPreviewImages({
     <div>
       {images.map((image, index) => (
         <div key={index} className="relative">
-          <img src={image} alt="preview" className="object-cover" />
+          <img
+            src={image}
+            alt="preview"
+            className="object-cover rounded-[4px]"
+          />
           <IonButton
             fill="clear"
             color="danger"
@@ -27,7 +31,11 @@ export default function FormPreviewImages({
             className="absolute top-0 right-0"
             onClick={() => removeImage(index)}
           >
-            <IonIcon slot="icon-only" icon={closeCircle} className="w-8 h-8" />
+            <IonIcon
+              slot="icon-only"
+              icon={closeCircle}
+              className="w-10 h-10"
+            />
           </IonButton>
         </div>
       ))}
