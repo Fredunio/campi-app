@@ -16,13 +16,13 @@ import clsx from "clsx";
 import { useForm } from "react-hook-form";
 import { z, ZodType } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabaseClient } from "../database/client";
 import SignupHeader from "../components/Layout/Headers/SignupHeader/SignupHeader";
 import {
   signInWithDiscord,
   signInWithFacebook,
   signInWithGoogle,
 } from "../lib/auth";
+import useSupabaseBrowser from "../database/client";
 
 const isNative = Capacitor.isNativePlatform();
 
@@ -81,6 +81,7 @@ const SignUp: React.FC = () => {
     resolver: zodResolver(signUpSchema),
   });
 
+  const supabaseClient = useSupabaseBrowser();
   console.log("pwd:", watch("password"));
 
   return (
@@ -147,7 +148,7 @@ const SignUp: React.FC = () => {
               color={"dark"}
               expand="full"
               size={isNative ? "large" : "default"}
-              onClick={signInWithGoogle}
+              onClick={() => signInWithGoogle(supabaseClient)}
               shape="round"
               className="rounded-full"
             >
@@ -163,7 +164,7 @@ const SignUp: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={signInWithFacebook}
+              onClick={() => signInWithFacebook(supabaseClient)}
             >
               <IonImg
                 src="/images/logos/facebook.png"
@@ -176,7 +177,7 @@ const SignUp: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={signInWithDiscord}
+              onClick={() => signInWithDiscord(supabaseClient)}
             >
               <IonImg
                 src="/images/logos/discord.png"

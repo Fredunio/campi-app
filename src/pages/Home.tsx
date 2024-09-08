@@ -19,7 +19,7 @@ import HomeHeader from "../components/Layout/Headers/HomeHeader/HomeHeader";
 import SearchModal from "../components/Modals/SearchModal/SearchModal";
 import MessagesModal from "../components/Modals/MessagesModal/MessagesModal";
 import NotificationsModal from "../components/Modals/NotificationsModal/NotificationsModal";
-import { add, bonfire, pin, pinOutline } from "ionicons/icons";
+import { add, bonfire, location, pin, pinOutline } from "ionicons/icons";
 import HomeSubheader from "../components/Layout/Headers/HomeSubheader/HomeSubheader";
 import { useCallback, useRef, useState } from "react";
 
@@ -133,7 +133,7 @@ const Home: React.FC = () => {
               <IonIcon icon={bonfire}></IonIcon>
             </IonFabButton>
             <IonFabButton href="/add_location" color={"medium"}>
-              <IonIcon icon={pinOutline}></IonIcon>
+              <IonIcon icon={location}></IonIcon>
             </IonFabButton>
           </IonFabList>
         </IonFab>

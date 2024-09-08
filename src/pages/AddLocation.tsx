@@ -4,10 +4,13 @@ import {
   IonContent,
   IonIcon,
   IonInput,
+  IonItem,
   IonLabel,
+  IonList,
   IonPage,
   IonRadio,
   IonRadioGroup,
+  IonSearchbar,
   IonSelect,
   IonSelectOption,
   IonTextarea,
@@ -21,6 +24,7 @@ import {
   imagesOutline,
   location,
   map,
+  searchCircle,
   trashBin,
   trashBinOutline,
 } from "ionicons/icons";
@@ -34,10 +38,22 @@ import {
   fileListToUrlArray,
   getFileExtension,
   isErrorInput,
-} from "../lib/helpers";
+} from "../utils/helpers";
 import FormErrorText from "../components/Layout/Forms/FormErrorText";
 import FormPreviewImages from "../components/Layout/Forms/FormPreviewImages";
 import { IMAGE_EXTENSIONS, MAX_IMAGE_SIZE } from "../lib/variables";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getLocationCategories,
+  getLocationSizes,
+  getLocationTypes,
+} from "../database/models/location";
+import useSupabaseBrowser from "../database/client";
+import { getConditions } from "../database/models/condition";
+import { capitalizeFirstLetter } from "../utils/helpers";
+import SelectLocationModal from "../components/Modals/SelectLocationModal/SelectLocationModal";
+import { getEquipments } from "../database/models/equipment";
+import { autocompleteGeolocationSearch } from "../lib/geo_search";
 
 const NewLocationInputsSchema = yup.object().shape({
   name: yup.string().required().min(3),
@@ -93,6 +109,9 @@ const NewLocationInputsSchema = yup.object().shape({
 
 type TNewLocationInputsSchema = yup.InferType<typeof NewLocationInputsSchema>;
 
+const selectLocationModalId = "add-location-select-location-modal";
+
+// TODO: add camera
 const AddLocation: React.FC = () => {
   const {
     register,
@@ -110,6 +129,56 @@ const AddLocation: React.FC = () => {
     },
     reValidateMode: "onBlur",
   });
+
+  const supabase = useSupabaseBrowser();
+
+  const {
+    data: categories,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+  } = useQuery({
+    queryKey: ["add_location_categories"],
+    queryFn: () => getLocationCategories(supabase),
+  });
+
+  const {
+    data: types,
+    isLoading: typesLoading,
+    isError: typesError,
+  } = useQuery({
+    queryKey: ["add_location_types"],
+    queryFn: () => getLocationTypes(supabase),
+  });
+
+  const {
+    data: sizes,
+    isLoading: sizesLoading,
+    isError: sizesError,
+  } = useQuery({
+    queryKey: ["add_location_sizes"],
+    queryFn: () => getLocationSizes(supabase),
+  });
+
+  const {
+    data: conditions,
+    isLoading: conditionsLoading,
+    isError: conditionsError,
+  } = useQuery({
+    queryKey: ["add_location_conditions"],
+    queryFn: () => getConditions(supabase),
+  });
+
+  const {
+    data: equipments,
+    isLoading: equipmentsLoading,
+    isError: equipmentsError,
+  } = useQuery({
+    queryKey: ["add_location_equipments"],
+    queryFn: () => getEquipments(supabase),
+  });
+
+  // TODO: Add type for searchResults
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const [previewImages, setPreviewImages] = useState<string[]>([]);
 
@@ -133,6 +202,7 @@ const AddLocation: React.FC = () => {
     const updatedTags = tags && tags.length > 0 ? [...tags, newTag] : [newTag];
 
     setValue("tags", updatedTags);
+    setValue("tagInput", "");
   }, [getValues, setValue]);
 
   const removeTag = useCallback(
@@ -152,7 +222,6 @@ const AddLocation: React.FC = () => {
       const currentImagesArr = getValues("images") as Array<File>; // File Array
       const newImagesFL = e.target.files; // FileList
       const newImagesArr = Array.from(newImagesFL as FileList);
-      console.log("newImagesArr: ", newImagesArr);
 
       // check for duplicates
       const updatedImages: File[] = [];
@@ -173,8 +242,6 @@ const AddLocation: React.FC = () => {
         }
       }
 
-      console.log("updatedImages: ", updatedImages);
-
       setValue("images", updatedImages);
       setPreviewImages(() => [...fileArrayToUrlArray(updatedImages)]);
     },
@@ -194,11 +261,23 @@ const AddLocation: React.FC = () => {
     [getValues, setValue]
   );
 
+  const handleSearchInput = useCallback(
+    async (ev: CustomEvent) => {
+      const query = ev.detail.value;
+      if (!query) {
+        setSearchResults([]);
+        return;
+      }
+      const results = await autocompleteGeolocationSearch(query);
+      setSearchResults(results);
+    },
+    [setSearchResults]
+  );
+
   const imagesField = register("images", { required: true });
 
   const areImages = previewImages && previewImages.length > 0;
   const tags = watch("tags");
-  console.log(errors);
 
   return (
     <IonPage>
@@ -230,9 +309,15 @@ const AddLocation: React.FC = () => {
             aria-invalid={errors.category ? "true" : "false"}
             className={`${isErrorInput(Boolean(errors.category))}`}
           >
-            <IonSelectOption value="1">Category 1</IonSelectOption>
+            {/* <IonSelectOption value="1">Category 1</IonSelectOption>
             <IonSelectOption value="2">Category 2</IonSelectOption>
-            <IonSelectOption value="3">Category 3</IonSelectOption>
+            <IonSelectOption value="3">Category 3</IonSelectOption> */}
+            {categories &&
+              categories.map((category) => (
+                <IonSelectOption key={category.name} value={category.name}>
+                  {capitalizeFirstLetter(category.name)}
+                </IonSelectOption>
+              ))}
           </IonSelect>
           <FormErrorText>
             {errors.category?.message ? errors.category.message : null}
@@ -249,9 +334,15 @@ const AddLocation: React.FC = () => {
             labelPlacement="floating"
             className={`${isErrorInput(Boolean(errors.type))}`}
           >
-            <IonSelectOption value="1">Type 1</IonSelectOption>
-            <IonSelectOption value="2">Type 2</IonSelectOption>
-            <IonSelectOption value="3">Type 3</IonSelectOption>
+            {/* <IonSelectOption value="1">Type 1</IonSelectOption> */}
+            {/* <IonSelectOption value="2">Type 2</IonSelectOption> */}
+            {/* <IonSelectOption value="3">Type 3</IonSelectOption> */}
+            {types &&
+              types.map((type) => (
+                <IonSelectOption key={type.name} value={type.name}>
+                  {capitalizeFirstLetter(type.name)}
+                </IonSelectOption>
+              ))}
           </IonSelect>
 
           <IonSelect
@@ -265,9 +356,17 @@ const AddLocation: React.FC = () => {
             labelPlacement="floating"
             className={`${isErrorInput(Boolean(errors.size))}`}
           >
-            <IonSelectOption value="1">Size 1</IonSelectOption>
+            {/* <IonSelectOption value="1">Size 1</IonSelectOption>
             <IonSelectOption value="2">Size 2</IonSelectOption>
-            <IonSelectOption value="3">Size 3</IonSelectOption>
+            <IonSelectOption value="3">Size 3</IonSelectOption> */}
+            {sizes &&
+              sizes
+                .sort((a, b) => (a.order > b.order ? 1 : -1))
+                .map((size) => (
+                  <IonSelectOption key={size.name} value={size.name}>
+                    {capitalizeFirstLetter(size.name)}
+                  </IonSelectOption>
+                ))}
           </IonSelect>
 
           <FormHeaderDivider>Images</FormHeaderDivider>
@@ -281,16 +380,12 @@ const AddLocation: React.FC = () => {
               id="image-upload"
               {...imagesField}
               onChange={(e) => {
-                // imagesField.onChange(e);
                 onImageChange(e);
               }}
             />
             <label
               htmlFor="image-upload"
-              // onClick={() => {
-              //   document.getElementById("image-upload")?.click();
-              // }}
-              className={`${areImages ? "hidden" : ""} w-full flex items-center flex-col gap-4 py-8 px-4 bg-transparent text-[var(--ion-background-color-step-300)] rounded-[4px] border-[var(--ion-background-color-step-300)] border-2 border-dashed`}
+              className={`${areImages ? "hidden" : ""} w-full flex items-center flex-col gap-4 py-8 px-4 bg-transparent text-[var(--ion-background-color-step-300)] ion-border-radius border-[var(--ion-background-color-step-300)] border-2 border-dashed`}
             >
               <IonIcon
                 className="w-12 h-12 "
@@ -354,19 +449,57 @@ const AddLocation: React.FC = () => {
             className={`${isErrorInput(Boolean(errors.description))}`}
           />
 
-          <div className="flex flex-row gap-2">
+          <div className="relative flex flex-row gap-2">
             <IonInput
-              type="text"
+              type="search"
               fill="outline"
               label="Address"
               labelPlacement="floating"
+              debounce={500}
+              onIonInput={(ev) => handleSearchInput(ev)}
               errorText={errors.address?.message ? errors.address.message : ""}
               className={`${isErrorInput(Boolean(errors.address))}`}
-            />
+              {...register("address")}
+            ></IonInput>
 
-            <IonButton color={"dark"} className="w-14">
+            <IonButton
+              aria-label="Open Map Modal"
+              id={selectLocationModalId}
+              expand="block"
+              color={"dark"}
+              className="w-14"
+            >
               <IonIcon slot="icon-only" icon={map} />
             </IonButton>
+            {/* autocomplete results */}
+            <IonList
+              className="absolute transform -translate-y-1/2 -translate-x-1/2 top-[110%] w-full max-h-[200px] overflow-y-auto shadow-lg z-10 ion-border-radius"
+              lines="full"
+            >
+              {searchResults.map((result) => (
+                <IonItem
+                  key={result.osm_id}
+                  button={true}
+                  onClick={() => {
+                    setValue("address", result.display_name);
+                    setSearchResults([]);
+                  }}
+                >
+                  <IonLabel>{result.display_name}</IonLabel>
+                </IonItem>
+              ))}
+            </IonList>
+            <SelectLocationModal
+              modalId={selectLocationModalId}
+              onDismiss={() => {}}
+              onConfirm={(selectedArea, selectedPosition) => {
+                console.log(
+                  "selectedArea, selectedPosition:",
+                  selectedArea,
+                  selectedPosition
+                );
+              }}
+            />
           </div>
 
           <IonSelect
@@ -379,12 +512,12 @@ const AddLocation: React.FC = () => {
             labelPlacement="floating"
             className={`${isErrorInput(Boolean(errors.conditions))}`}
           >
-            <IonSelectOption value="1">Condition 1</IonSelectOption>
-            <IonSelectOption value="4">Condition 4</IonSelectOption>
-            <IonSelectOption value="5">Condition 5</IonSelectOption>
-            <IonSelectOption value="6">Condition 6</IonSelectOption>
-            <IonSelectOption value="7">Condition 7</IonSelectOption>
-            <IonSelectOption value="8">Condition 8</IonSelectOption>
+            {conditions &&
+              conditions.map((condition) => (
+                <IonSelectOption key={condition.name} value={condition.name}>
+                  {capitalizeFirstLetter(condition.name)}
+                </IonSelectOption>
+              ))}
           </IonSelect>
 
           <IonSelect
@@ -397,12 +530,12 @@ const AddLocation: React.FC = () => {
             labelPlacement="floating"
             className={`${isErrorInput(Boolean(errors.equipment))}`}
           >
-            <IonSelectOption value="1">Equipment 1</IonSelectOption>
-            <IonSelectOption value="4">Equipment 4</IonSelectOption>
-            <IonSelectOption value="5">Equipment 5</IonSelectOption>
-            <IonSelectOption value="6">Equipment 6</IonSelectOption>
-            <IonSelectOption value="7">Equipment 7</IonSelectOption>
-            <IonSelectOption value="8">Equipment 8</IonSelectOption>
+            {equipments &&
+              equipments.map((equipment) => (
+                <IonSelectOption key={equipment.name} value={equipment.name}>
+                  {capitalizeFirstLetter(equipment.name)}
+                </IonSelectOption>
+              ))}
           </IonSelect>
 
           <FormHeaderDivider>Additional Info</FormHeaderDivider>
@@ -446,10 +579,10 @@ const AddLocation: React.FC = () => {
             name="visibility"
             defaultValue={"public"}
             value={getValues("visibility")}
-            className="flex flex-row items-center gap-10 form-field-group"
+            className="relative flex flex-row flex-wrap items-center gap-10 form-field-group"
           >
-            <label className="label-text-wrapper ">
-              <div className="label-text">Visibility:</div>
+            <label className="absolute text-xs -top-2 label-text-wrapper">
+              <div className="label-text">Visibility</div>
             </label>
 
             <IonRadio
@@ -473,15 +606,21 @@ const AddLocation: React.FC = () => {
             <label className="label-text-wrapper ">
               <div className="label-text">Are you in the location?</div>
             </label>
-            <IonButton color={"dark"} shape="round" fill="solid" size="small">
+            <IonButton
+              color={"dark"}
+              shape="round"
+              fill="solid"
+              size="small"
+              className="whitespace-nowrap"
+            >
               Check In
               <IonIcon slot="end" icon={location} />
             </IonButton>
             <IonButton
               color={"dark"}
               fill="clear"
-              size="small"
-              className="ml-auto"
+              // size="small"
+              // className="ml-auto"
             >
               <IonIcon slot="icon-only" icon={helpCircleOutline} />
             </IonButton>

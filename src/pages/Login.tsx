@@ -19,10 +19,13 @@ import {
   signInWithFacebook,
   signInWithGoogle,
 } from "../lib/auth";
+import useSupabaseBrowser from "../database/client";
 
 const isNative = Capacitor.isNativePlatform();
 
 const Login: React.FC = () => {
+  const supabaseClient = useSupabaseBrowser();
+
   return (
     <IonPage id="login-page">
       <LoginHeader />
@@ -70,7 +73,7 @@ const Login: React.FC = () => {
               color={"dark"}
               expand="full"
               size={isNative ? "large" : "default"}
-              onClick={signInWithGoogle}
+              onClick={() => signInWithGoogle(supabaseClient)}
               shape="round"
               className="rounded-full"
             >
@@ -86,7 +89,7 @@ const Login: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={signInWithFacebook}
+              onClick={() => signInWithFacebook(supabaseClient)}
             >
               <IonImg
                 src="/images/logos/facebook.png"
@@ -99,7 +102,7 @@ const Login: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={signInWithDiscord}
+              onClick={() => signInWithDiscord(supabaseClient)}
             >
               <IonImg
                 src="/images/logos/discord.png"

@@ -1,4 +1,5 @@
 import {
+  IonAvatar,
   IonButton,
   IonButtons,
   IonCard,
@@ -35,7 +36,29 @@ import {
 
 export default function LocationCard() {
   return (
-    <IonCard className="mx-0">
+    <IonCard className="mx-0 rounded-none">
+      <IonCardHeader className="px-4">
+        <IonCardTitle color={"dark"} className="text-xl">
+          <div className="flex items-center gap-4">
+            <IonAvatar className="flex-shrink-0 w-12 h-12">
+              <img
+                src="https://ionicframework.com/docs/img/demos/avatar.svg"
+                alt="Avatar"
+              />
+            </IonAvatar>
+            <div>
+              <h4 className="m-0">A Cool Camping Spot Near You</h4>
+              <h5 className="m-0 text-sm font-light text-opacity-50">
+                John Doe, 24 August 2024
+              </h5>
+            </div>
+          </div>
+        </IonCardTitle>
+        {/* <IonCardSubtitle>
+          <div className="flex flex-wrap items-center -mx-2 -mt-1">
+          </div>
+        </IonCardSubtitle> */}
+      </IonCardHeader>
       <div className="relative">
         <img
           alt="Silhouette of mountains"
@@ -52,9 +75,6 @@ export default function LocationCard() {
       </div>
 
       <IonCardHeader>
-        <IonCardTitle color={"dark"} className="font-semibold">
-          A Cool Camping Spot Near You
-        </IonCardTitle>
         <IonCardSubtitle>
           <div className="flex flex-wrap items-center -mx-2 -mt-1">
             {/* icons that show what event/location */}

@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
-import { supabaseClient } from "../database/client";
 import { User } from "@supabase/supabase-js";
+import useSupabaseBrowser from "../database/client";
 
 // auth provider
 
@@ -13,7 +13,7 @@ export const AuthContext = createContext<{
 });
 
 const AuthProvider = function ({ children }: { children: React.ReactNode }) {
-  const supabase = supabaseClient;
+  const supabase = useSupabaseBrowser();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 

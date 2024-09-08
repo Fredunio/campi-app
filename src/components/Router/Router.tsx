@@ -20,6 +20,7 @@ import { homeOutline, journalOutline, mapOutline } from "ionicons/icons";
 import useAuth from "../../hooks/useAuth/useAuth";
 import { IonReactRouter } from "@ionic/react-router";
 import Add from "../../pages/Add";
+import Map from "../../pages/Map";
 
 const tabs = [
   {
@@ -29,10 +30,10 @@ const tabs = [
     href: "/",
   },
   {
-    title: "Maps",
+    title: "Map",
     icon: mapOutline,
     id: "map-tab",
-    href: "/maps",
+    href: "/map",
   },
   {
     title: "Journal",
@@ -57,18 +58,12 @@ export default function Router() {
           </Route>
           <Route path="/add_location" component={AddLocation} />
           <Route path="/add_event" component={AddEvent} />
-          <Route path="/dashboard">
-            <Dashboard />
-          </Route>
-          <Route path="/journal">
-            <Journal />
-          </Route>
-          <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/signup">
-            <SignUp />;
-          </Route>
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/map" component={Map} />
+
+          <Route path="/journal" component={Journal} />
+          <Route path="/login" component={Login} />
+          <Route path="/signup" component={SignUp} />
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
           {tabs.map((tab) => (

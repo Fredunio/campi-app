@@ -1,3 +1,11 @@
+export function capitalizeFirstLetter(str: string): string {
+  return str[0].toUpperCase() + str.slice(1);
+}
+
+export function capitalizeAllWords(str: string): string {
+  return str.split(" ").map(capitalizeFirstLetter).join(" ");
+}
+
 export function isErrorInput(isError: boolean | undefined) {
   // https://ionicframework.com/docs/api/input#helper--error-text
   if (isError) {

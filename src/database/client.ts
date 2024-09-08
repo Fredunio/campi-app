@@ -1,14 +1,31 @@
 import { createClient } from "@supabase/supabase-js";
+import { Database } from "./database.types";
+import { TypedSupabaseClient } from "../utils/types";
+import { useMemo } from "react";
 
 const anonKey = process.env["ANON_KEY"];
 const supabaseUrl = process.env["SUPABASE_URL"];
 
-if (!anonKey) {
-  throw new Error("Missing ANON_KEY");
+let client: TypedSupabaseClient | undefined;
+
+function getSupabaseClient() {
+  if (client) {
+    return client;
+  }
+
+  if (!anonKey) {
+    throw new Error("Missing ANON_KEY");
+  }
+
+  if (!supabaseUrl) {
+    throw new Error("Missing SUPABASE_URL");
+  }
+
+  client = createClient<Database>(supabaseUrl, anonKey);
+
+  return client;
 }
 
-if (!supabaseUrl) {
-  throw new Error("Missing SUPABASE_URL");
+export default function useSupabaseBrowser() {
+  return useMemo(getSupabaseClient, []);
 }
-
-export const supabaseClient = createClient(supabaseUrl, anonKey);

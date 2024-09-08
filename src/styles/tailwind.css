@@ -5,6 +5,11 @@ ion-icon {
   --ionicon-stroke-width: 40px;
 }
 
+/* react-leaflet-draw */
+.sr-only {
+  display: none;
+}
+
 @layer components {
   .subheader-btn {
     @apply p-0 px-2 capitalize rounded-sm bg-transparent;
@@ -25,5 +30,9 @@ ion-icon {
 @layer utilities {
   .error-border {
     @apply border-1 border-[var(--highlight-color-invalid)] rounded-[var(--border-radius)] border-solid;
+  }
+
+  .ion-border-radius {
+    @apply rounded-[var(--ion-border-radius)];
   }
 }

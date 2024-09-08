@@ -1,10 +1,5 @@
 import { Route } from "react-router-dom";
-import {
-  IonApp,
-  IonRouterOutlet,
-  IonTabs,
-  setupIonicReact,
-} from "@ionic/react";
+import { IonApp, setupIonicReact } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { homeOutline, journalOutline, mapOutline } from "ionicons/icons";
 import Dashboard from "./pages/Dashboard";
@@ -44,52 +39,32 @@ import "./styles/variables.css";
 /* Tailwind CSS */
 import "./styles/tailwind.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Home from "./pages/Home";
-import AddLocation from "./pages/AddLocation";
-import AddEvent from "./pages/AddEvent";
-import Journal from "./pages/Journal";
 import AuthProvider from "./providers/AuthProvider";
-import NavTabs from "./components/Layout/NavTabs/NavTabs";
 import Router from "./components/Router/Router";
+import { useState } from "react";
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
 setupIonicReact();
 
 const App: React.FC = function () {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60, // 1 minute
+          },
+        },
+      })
+  );
+
   return (
     <IonApp>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          {/* Nav buttons in Router Component */}
           <Router />
-          {/* <IonReactRouter>
-            <IonTabs>
-              <IonRouterOutlet>
-                <Route exact path="/">
-                  <Home />
-                </Route>
-                <Route exact path="/add_location">
-                  <AddLocation />
-                </Route>
-                <Route exact path="/add_event">
-                  <AddEvent />
-                </Route>
-                <Route path="/dashboard">
-                  <Dashboard />
-                </Route>
-                <Route path="/journal">
-                  <Journal />
-                </Route>
-                <Route path="/login">
-                  <Login />
-                </Route>
-                <Route path="/signup">
-                  <SignUp />;
-                </Route>
-              </IonRouterOutlet>
-              <NavTabs />
-            </IonTabs>
-          </IonReactRouter> */}
         </AuthProvider>
       </QueryClientProvider>
     </IonApp>
