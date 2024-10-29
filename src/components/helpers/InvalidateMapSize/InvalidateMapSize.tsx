@@ -9,6 +9,7 @@ export default function InvalidateMapSize() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       map.invalidateSize();
+      console.log("Map size invalidated");
     }, 0);
     return () => clearTimeout(timeout);
   }, [map]);

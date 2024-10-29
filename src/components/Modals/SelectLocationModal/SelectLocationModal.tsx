@@ -1,4 +1,4 @@
-import { Geolocation, Position } from "@capacitor/geolocation";
+import { Position } from "@capacitor/geolocation";
 import {
   IonButton,
   IonButtons,
@@ -12,7 +12,7 @@ import {
 import { EditControl } from "react-leaflet-draw";
 import { OverlayEventDetail } from "@ionic/react/dist/types/components/react-component-lib/interfaces";
 import { arrowBackOutline } from "ionicons/icons";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   FeatureGroup,
   MapContainer,
@@ -23,13 +23,18 @@ import {
 } from "react-leaflet";
 import { mapTileProvider } from "../../../lib/map";
 import InvalidateMapSize from "../../helpers/InvalidateMapSize/InvalidateMapSize";
-import { LatLng, Layer } from "leaflet";
-import * as turf from "@turf/turf";
+import { Circle, DrawEvents, LatLng, Layer, Polygon } from "leaflet";
+import { defaultPosition } from "../../../lib/variables";
+import { area, centroid } from "@turf/turf";
+import { DrawSelectedPolygonsOnMount } from "../../helpers/DrawSelectedPolygonsOnMount/DrawSelectedPolygonsOnMount";
+import { isCircle, isPolygon, TSelectedArea } from "../../../utils/types";
 
 // For accessing the _leaflet_id internal property
 declare module "leaflet" {
   interface Layer {
-    _leaflet_id: number; // Assuming it's a number, adjust if needed
+    _leaflet_id: number;
+    _latlng: LatLng;
+    _mRadius: number;
   }
 }
 
@@ -41,42 +46,36 @@ function isShape(layerOptions: Layer["options"]) {
   );
 }
 
-const defaultPosition: Position = {
-  coords: {
-    latitude: 52.237049,
-    longitude: 21.017532,
-    accuracy: 0,
-    altitude: null,
-    altitudeAccuracy: null,
-    heading: null,
-    speed: null,
-  },
-  timestamp: 0,
-};
-
 // TODO: add area size limit, e.g. 1000000m2
 // TODO: show selcted areas after re-opening the modal
+// FIXME: fix the bug when drawing circle, it creates a marker in the center
+// FIXME: fix the bug when creating a marker, the previous selected position marker is not removed
+// MAYBE: add search bar for location search map
 export default function SelectLocationModal({
   modalId,
+  currentPosition,
+  selectedPosition,
+  selectedArea,
+  setSelectedArea,
+  setSelectedPosition,
   onDismiss,
   onConfirm,
 }: {
   modalId: string;
+  currentPosition: Position | null;
+  selectedPosition: LatLng | null;
+  // selectedArea: GeoJSON.GeoJSON | null;
+  selectedArea: TSelectedArea | null;
+  // setSelectedArea: (selectedArea: GeoJSON.GeoJSON | null) => void;
+  setSelectedArea: (selectedArea: TSelectedArea | null) => void;
+  setSelectedPosition: (selectedPosition: LatLng | null) => void;
   onDismiss: () => void;
   onConfirm: (
-    selectedArea: typeof turf.geojsonType | null,
+    selectedArea: TSelectedArea | null,
     selectedPosition: LatLng | null
   ) => void;
 }) {
   const modal = useRef<HTMLIonModalElement>(null);
-  const [currentPosition, setCurrentPosition] = useState<Position | null>(
-    defaultPosition
-  );
-
-  const [selectedPosition, setSelectedPosition] = useState<LatLng | null>(null);
-  const [selectedArea, setSelectedArea] = useState<
-    typeof turf.geojsonType | null
-  >(null);
 
   const [areaSize, setAreaSize] = useState<number | null>(null);
   const [areaSizeError, setAreaSizeError] = useState<boolean | string>(false);
@@ -85,19 +84,20 @@ export default function SelectLocationModal({
 
   function onWillDismiss(ev: CustomEvent<OverlayEventDetail>) {
     if (ev.detail.role === "confirm") {
+      // console.log("ev.detail.role === confirm", ev);
       onConfirm(ev.detail.data.selectedArea, ev.detail.data.selectedPosition);
     }
-    console.log("onWillDismiss ev", ev);
+    // console.log("onWillDismiss ev", ev);
     // onDismiss();
   }
 
   function LocationMarker() {
     const mapEv = useMapEvents({
       click(e) {
-        console.log("click start");
         if (blockSelectPosition) {
           return;
         }
+        console.log("click marker");
 
         if (selectedArea) {
           setSelectedArea(null);
@@ -107,12 +107,11 @@ export default function SelectLocationModal({
             }
           });
         }
-        const coords = e.latlng;
         setSelectedPosition(e.latlng);
-        console.log("e.latlng: ", e.latlng);
-        console.log("click end");
       },
     });
+
+    console.log("selectedPosition", selectedPosition);
     return selectedPosition ? (
       <Marker position={selectedPosition}></Marker>
     ) : null;
@@ -136,16 +135,6 @@ export default function SelectLocationModal({
     });
     return null;
   }
-
-  useEffect(() => {
-    Geolocation.getCurrentPosition()
-      .then((position) => {
-        setCurrentPosition(position);
-      })
-      .catch((error) => {
-        console.error("Error getting position", error);
-      });
-  }, []);
 
   return (
     <IonModal
@@ -181,12 +170,33 @@ export default function SelectLocationModal({
       </IonHeader>
       <IonContent className="ion-padding">
         <MapContainer
-          center={[
-            currentPosition?.coords.latitude || defaultPosition.coords.latitude,
-            currentPosition?.coords.longitude ||
-              defaultPosition.coords.longitude,
-          ]}
-          zoom={currentPosition ? 13 : 16}
+          // TODO: tidy this up/extract somewhere
+          center={
+            selectedPosition
+              ? [selectedPosition.lat, selectedPosition.lng]
+              : selectedArea && isPolygon(selectedArea)
+                ? [
+                    centroid(selectedArea.toGeoJSON()).geometry.coordinates[1],
+                    centroid(selectedArea.toGeoJSON()).geometry.coordinates[0],
+                  ]
+                : selectedArea && isCircle(selectedArea)
+                  ? [
+                      centroid(selectedArea.toGeoJSON()).geometry
+                        .coordinates[1],
+                      centroid(selectedArea.toGeoJSON()).geometry
+                        .coordinates[0],
+                    ]
+                  : currentPosition
+                    ? [
+                        currentPosition.coords.latitude,
+                        currentPosition.coords.longitude,
+                      ]
+                    : [
+                        defaultPosition.coords.latitude,
+                        defaultPosition.coords.longitude,
+                      ]
+          }
+          zoom={currentPosition ? 13 : 12}
           markerZoomAnimation={true}
           scrollWheelZoom={true}
           className="h-full"
@@ -210,32 +220,42 @@ export default function SelectLocationModal({
                 setSelectedArea(null);
                 setBlockSelectPosition(false);
               }}
-              onEdited={(e) => {
+              onEdited={(e: DrawEvents.Edited) => {
                 // Handle area edition (polygon, circle)
-                setSelectedArea(e.layers.toGeoJSON());
+                console.log("draw edited", e);
+                setSelectedArea(e.layer);
               }}
-              onCreated={(e) => {
+              onCreated={(e: DrawEvents.Created) => {
                 // Handle area selection (polygon, circle)
-                const area = e.layer.toGeoJSON();
-                let areaSize = 0;
+                const shapeLayer = e.layer;
+                console.log("draw created", shapeLayer);
+
+                const layerType = e.layerType;
                 // calculate area size
-                if (e.layerType === "circle") {
-                  const radius = e.layer.getRadius();
-                  areaSize = Math.PI * radius * radius;
-                  console.log("circle area", areaSize);
-                } else if (e.layerType === "polygon") {
-                  areaSize = turf.area(e.layer.toGeoJSON());
-                  console.log("polygon area", areaSize);
+                if (layerType === "circle") {
+                  const radius = e.layer._mRadius;
+                  setAreaSize(Math.PI * radius * radius);
+                } else if (layerType === "polygon") {
+                  // TODO: calculate area size for polygon
+                  setAreaSize(area(e.layer.toGeoJSON()));
+                  // console.log("polygon area", area(e.layer.toGeoJSON()));
                 }
 
-                setSelectedArea(area);
-                console.log("area", area);
+                if (isCircle(shapeLayer) || isPolygon(shapeLayer)) {
+                  setSelectedArea(shapeLayer);
+                }
 
+                setSelectedPosition(null);
+
+                console.log(
+                  "instance of shapeLayer",
+                  shapeLayer instanceof Circle || shapeLayer instanceof Polygon
+                );
                 // Has to set timeout, because when last vertex of polygon is clicked,
                 //  after created event is triggered, the click event is triggered also, and it cancels the selected area
                 setTimeout(() => {
                   setBlockSelectPosition(false);
-                }, 100);
+                }, 200);
               }}
               draw={{
                 polygon: true,
@@ -249,6 +269,7 @@ export default function SelectLocationModal({
             />
           </FeatureGroup>
           <LocationMarker />
+          <DrawSelectedPolygonsOnMount selectedArea={selectedArea} />
           <RemovePreviousPolygons />
         </MapContainer>
       </IonContent>

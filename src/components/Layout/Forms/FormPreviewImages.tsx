@@ -9,7 +9,6 @@ export default function FormPreviewImages({
   images: string[] | undefined;
   removeImage: (index: number) => void;
 }) {
-  console.log(images);
   if (!images || images.length === 0 || !images[0]) {
     return null;
   }

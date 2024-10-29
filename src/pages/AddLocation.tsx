@@ -10,9 +10,9 @@ import {
   IonPage,
   IonRadio,
   IonRadioGroup,
-  IonSearchbar,
   IonSelect,
   IonSelectOption,
+  IonSpinner,
   IonTextarea,
 } from "@ionic/react";
 import GoBackHeader from "../components/Layout/Headers/GoBackHeader/GoBackHeader";
@@ -24,11 +24,9 @@ import {
   imagesOutline,
   location,
   map,
-  searchCircle,
-  trashBin,
   trashBinOutline,
 } from "ionicons/icons";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FormHeaderDivider from "../components/Layout/FormHeaderDivider/FormHeaderDivider";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -41,7 +39,11 @@ import {
 } from "../utils/helpers";
 import FormErrorText from "../components/Layout/Forms/FormErrorText";
 import FormPreviewImages from "../components/Layout/Forms/FormPreviewImages";
-import { IMAGE_EXTENSIONS, MAX_IMAGE_SIZE } from "../lib/variables";
+import {
+  defaultPosition,
+  IMAGE_EXTENSIONS,
+  MAX_IMAGE_SIZE,
+} from "../lib/variables";
 import { useQuery } from "@tanstack/react-query";
 import {
   getLocationCategories,
@@ -53,7 +55,15 @@ import { getConditions } from "../database/models/condition";
 import { capitalizeFirstLetter } from "../utils/helpers";
 import SelectLocationModal from "../components/Modals/SelectLocationModal/SelectLocationModal";
 import { getEquipments } from "../database/models/equipment";
-import { autocompleteGeolocationSearch } from "../lib/geo_search";
+import {
+  autocompleteGeolocationSearch,
+  reverseGeocode,
+} from "../lib/geo_search";
+import { Geolocation, Position } from "@capacitor/geolocation";
+import { centroid } from "@turf/turf";
+import { LatLng, Layer } from "leaflet";
+import { LocationIQAutocompleteResult, TSelectedArea } from "../utils/types";
+import CheckInButton from "../components/Buttons/CheckInButton";
 
 const NewLocationInputsSchema = yup.object().shape({
   name: yup.string().required().min(3),
@@ -101,10 +111,12 @@ const NewLocationInputsSchema = yup.object().shape({
   description: yup.string().required(),
   address: yup.string().required(),
   conditions: yup.array().of(yup.string()).notRequired(),
-  equipment: yup.array().of(yup.string()).notRequired(),
+  features: yup.array().of(yup.string()).notRequired(),
+  equipments: yup.array().of(yup.string()).notRequired(),
   tagInput: yup.string().notRequired(),
   tags: yup.array().of(yup.string()).required(),
   visibility: yup.string().oneOf(["public", "private"]).required(),
+  checkedIn: yup.boolean(),
 });
 
 type TNewLocationInputsSchema = yup.InferType<typeof NewLocationInputsSchema>;
@@ -112,6 +124,7 @@ type TNewLocationInputsSchema = yup.InferType<typeof NewLocationInputsSchema>;
 const selectLocationModalId = "add-location-select-location-modal";
 
 // TODO: add camera
+// Maybe: change select inputs to modal with icons and search
 const AddLocation: React.FC = () => {
   const {
     register,
@@ -126,6 +139,7 @@ const AddLocation: React.FC = () => {
       tagInput: "",
       visibility: "public",
       tags: [],
+      checkedIn: false,
     },
     reValidateMode: "onBlur",
   });
@@ -169,6 +183,15 @@ const AddLocation: React.FC = () => {
   });
 
   const {
+    data: features,
+    isLoading: featuresLoading,
+    isError: featuresError,
+  } = useQuery({
+    queryKey: ["add_location_features"],
+    queryFn: () => getConditions(supabase),
+  });
+
+  const {
     data: equipments,
     isLoading: equipmentsLoading,
     isError: equipmentsError,
@@ -177,10 +200,24 @@ const AddLocation: React.FC = () => {
     queryFn: () => getEquipments(supabase),
   });
 
+  const resultRefs = useRef<(HTMLIonItemElement | null)[]>([]);
+
   // TODO: Add type for searchResults
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<
+    LocationIQAutocompleteResult[] | undefined
+  >([]);
+
+  const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
+
+  const [addressButtonDisabled, setAddressButtonDisabled] = useState(true);
 
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+
+  // States for the map modal
+  const [selectedPosition, setSelectedPosition] = useState<LatLng | null>(null);
+  const [selectedArea, setSelectedArea] = useState<TSelectedArea | null>(null);
+
+  const [checkInBtnLoading, setCheckInBtnLoading] = useState(false);
 
   const onSubmit: SubmitHandler<TNewLocationInputsSchema> = (data) => {
     console.log(data);
@@ -261,23 +298,95 @@ const AddLocation: React.FC = () => {
     [getValues, setValue]
   );
 
-  const handleSearchInput = useCallback(
-    async (ev: CustomEvent) => {
-      const query = ev.detail.value;
-      if (!query) {
+  const handleAddressSearchInput = useCallback(
+    async (stringQuery: string | number | null | undefined) => {
+      if (!stringQuery) {
         setSearchResults([]);
         return;
       }
-      const results = await autocompleteGeolocationSearch(query);
+      const results = await autocompleteGeolocationSearch(
+        stringQuery.toString()
+      );
       setSearchResults(results);
     },
     [setSearchResults]
   );
 
+  const handleOnConfirmLocation = useCallback(
+    async (
+      selectedArea: TSelectedArea | null,
+      selectedPosition: LatLng | null
+    ) => {
+      if (selectedArea) {
+        // center of the selected area
+        const center = centroid(selectedArea.toGeoJSON());
+        const lat = center.geometry.coordinates[1];
+        const lon = center.geometry.coordinates[0];
+        // console.log("center: ", center);
+        // console.log("lat, lon: ", lat, lon);
+
+        const reverseGeo = await reverseGeocode(lat.toString(), lon.toString());
+        if (reverseGeo) {
+          setValue("address", reverseGeo?.display_name);
+        }
+      }
+      if (selectedPosition) {
+        // console.log("selectedPosition: ", selectedPosition);
+        const reverseGeo = await reverseGeocode(
+          selectedPosition.lat.toString(),
+          selectedPosition.lng.toString()
+        );
+        if (reverseGeo) {
+          setValue("address", reverseGeo?.display_name);
+        }
+
+        // console.log("reverseGeo: ", reverseGeo);
+      }
+    },
+    []
+  );
+
+  const handleCheckIn = useCallback(async () => {
+    setCheckInBtnLoading(true);
+    try {
+      if (!getValues("checkedIn")) {
+        const position = await Geolocation.getCurrentPosition();
+        console.log("Checked in position: ", position);
+        setCurrentPosition(position);
+
+        // Calculate if the user is near the location
+        // If yes, set the checkedIn to true
+        setValue("checkedIn", true);
+      } else {
+        setValue("checkedIn", false);
+      }
+    } catch (error) {
+      setCurrentPosition(null);
+      setValue("checkedIn", false);
+      console.error("Error getting position", error);
+    } finally {
+      // Always set loading to false after async operation finishes
+      setCheckInBtnLoading(false);
+    }
+  }, []);
+
   const imagesField = register("images", { required: true });
 
   const areImages = previewImages && previewImages.length > 0;
   const tags = watch("tags");
+  const isCheckedIn = watch("checkedIn");
+  useEffect(() => {
+    Geolocation.getCurrentPosition()
+      .then((position) => {
+        setCurrentPosition(position);
+        console.log("Current position", position);
+        setAddressButtonDisabled(false);
+      })
+      .catch((error) => {
+        console.error("Error getting position", error);
+        setAddressButtonDisabled(false);
+      });
+  }, []);
 
   return (
     <IonPage>
@@ -309,9 +418,6 @@ const AddLocation: React.FC = () => {
             aria-invalid={errors.category ? "true" : "false"}
             className={`${isErrorInput(Boolean(errors.category))}`}
           >
-            {/* <IonSelectOption value="1">Category 1</IonSelectOption>
-            <IonSelectOption value="2">Category 2</IonSelectOption>
-            <IonSelectOption value="3">Category 3</IonSelectOption> */}
             {categories &&
               categories.map((category) => (
                 <IonSelectOption key={category.name} value={category.name}>
@@ -332,11 +438,10 @@ const AddLocation: React.FC = () => {
             fill="outline"
             label="Type"
             labelPlacement="floating"
+            aria-invalid={errors.type ? "true" : "false"}
+            {...register("type")}
             className={`${isErrorInput(Boolean(errors.type))}`}
           >
-            {/* <IonSelectOption value="1">Type 1</IonSelectOption> */}
-            {/* <IonSelectOption value="2">Type 2</IonSelectOption> */}
-            {/* <IonSelectOption value="3">Type 3</IonSelectOption> */}
             {types &&
               types.map((type) => (
                 <IonSelectOption key={type.name} value={type.name}>
@@ -354,11 +459,10 @@ const AddLocation: React.FC = () => {
             fill="outline"
             label="Size"
             labelPlacement="floating"
+            aria-invalid={errors.size ? "true" : "false"}
+            {...register("size")}
             className={`${isErrorInput(Boolean(errors.size))}`}
           >
-            {/* <IonSelectOption value="1">Size 1</IonSelectOption>
-            <IonSelectOption value="2">Size 2</IonSelectOption>
-            <IonSelectOption value="3">Size 3</IonSelectOption> */}
             {sizes &&
               sizes
                 .sort((a, b) => (a.order > b.order ? 1 : -1))
@@ -446,6 +550,7 @@ const AddLocation: React.FC = () => {
             counter={true}
             maxlength={500}
             inputmode="text"
+            {...register("description")}
             className={`${isErrorInput(Boolean(errors.description))}`}
           />
 
@@ -456,10 +561,16 @@ const AddLocation: React.FC = () => {
               label="Address"
               labelPlacement="floating"
               debounce={500}
-              onIonInput={(ev) => handleSearchInput(ev)}
+              onIonInput={(ev) => handleAddressSearchInput(ev.target.value)}
               errorText={errors.address?.message ? errors.address.message : ""}
               className={`${isErrorInput(Boolean(errors.address))}`}
               {...register("address")}
+              clearInput={true}
+              onIonBlur={() => {
+                setTimeout(() => {
+                  setSearchResults([]);
+                }, 50); // Add a small timeout to allow click events to complete
+              }}
             ></IonInput>
 
             <IonButton
@@ -468,37 +579,45 @@ const AddLocation: React.FC = () => {
               expand="block"
               color={"dark"}
               className="w-14"
+              disabled={addressButtonDisabled}
             >
               <IonIcon slot="icon-only" icon={map} />
             </IonButton>
+
             {/* autocomplete results */}
-            <IonList
-              className="absolute transform -translate-y-1/2 -translate-x-1/2 top-[110%] w-full max-h-[200px] overflow-y-auto shadow-lg z-10 ion-border-radius"
-              lines="full"
-            >
-              {searchResults.map((result) => (
-                <IonItem
-                  key={result.osm_id}
-                  button={true}
-                  onClick={() => {
-                    setValue("address", result.display_name);
-                    setSearchResults([]);
-                  }}
-                >
-                  <IonLabel>{result.display_name}</IonLabel>
-                </IonItem>
-              ))}
-            </IonList>
+            {searchResults && searchResults.length > 0 && (
+              <IonList
+                className="absolute transform -translate-y-1/2 -translate-x-1/2 top-[110%] w-full max-h-[200px] overflow-y-auto shadow-lg z-20 ion-border-radius"
+                lines="full"
+              >
+                {searchResults.map((result, index) => (
+                  <IonItem
+                    key={result.osm_id}
+                    button={true}
+                    className="z-20"
+                    ref={(el) => (resultRefs.current[index] = el)} // Assign ref to each IonItem
+                    onClick={() => {
+                      console.log("Clicked");
+                      console.log("Selected result: ", result);
+                      setValue("address", result.display_name);
+                      setSearchResults([]);
+                    }}
+                  >
+                    <IonLabel>{result.display_name}</IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
+            )}
+
             <SelectLocationModal
+              selectedArea={selectedArea}
+              setSelectedArea={setSelectedArea}
+              selectedPosition={selectedPosition}
+              setSelectedPosition={setSelectedPosition}
               modalId={selectLocationModalId}
+              currentPosition={currentPosition}
               onDismiss={() => {}}
-              onConfirm={(selectedArea, selectedPosition) => {
-                console.log(
-                  "selectedArea, selectedPosition:",
-                  selectedArea,
-                  selectedPosition
-                );
-              }}
+              onConfirm={handleOnConfirmLocation}
             />
           </div>
 
@@ -510,6 +629,7 @@ const AddLocation: React.FC = () => {
             fill="outline"
             label="Conditions"
             labelPlacement="floating"
+            {...register("conditions")}
             className={`${isErrorInput(Boolean(errors.conditions))}`}
           >
             {conditions &&
@@ -522,13 +642,33 @@ const AddLocation: React.FC = () => {
 
           <IonSelect
             multiple={true}
+            placeholder="Select Features"
+            cancelText="Cancel"
+            okText="Okay"
+            fill="outline"
+            label="Features"
+            labelPlacement="floating"
+            className={`${isErrorInput(Boolean(errors.features))}`}
+            {...register("features")}
+          >
+            {features &&
+              features.map((feature) => (
+                <IonSelectOption key={feature.name} value={feature.name}>
+                  {capitalizeFirstLetter(feature.name)}
+                </IonSelectOption>
+              ))}
+          </IonSelect>
+
+          <IonSelect
+            multiple={true}
             placeholder="Needed Equipment"
             cancelText="Cancel"
             okText="Okay"
             fill="outline"
             label="Equipment"
             labelPlacement="floating"
-            className={`${isErrorInput(Boolean(errors.equipment))}`}
+            className={`${isErrorInput(Boolean(errors.equipments))}`}
+            {...register("equipments")}
           >
             {equipments &&
               equipments.map((equipment) => (
@@ -606,22 +746,19 @@ const AddLocation: React.FC = () => {
             <label className="label-text-wrapper ">
               <div className="label-text">Are you in the location?</div>
             </label>
-            <IonButton
-              color={"dark"}
-              shape="round"
-              fill="solid"
-              size="small"
-              className="whitespace-nowrap"
-            >
-              Check In
-              <IonIcon slot="end" icon={location} />
-            </IonButton>
-            <IonButton
-              color={"dark"}
-              fill="clear"
-              // size="small"
-              // className="ml-auto"
-            >
+            <CheckInButton
+              checkedIn={isCheckedIn}
+              handleCheckIn={handleCheckIn}
+              loading={checkInBtnLoading}
+            />
+
+            <input
+              type="checkbox"
+              {...register("checkedIn")}
+              className="hidden"
+            />
+
+            <IonButton color={"dark"} fill="clear">
               <IonIcon slot="icon-only" icon={helpCircleOutline} />
             </IonButton>
           </div>

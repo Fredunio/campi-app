@@ -156,6 +156,27 @@ export type Database = {
         }
         Relationships: []
       }
+      Feature: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
       Guide: {
         Row: {
           body: string
