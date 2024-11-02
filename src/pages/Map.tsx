@@ -8,6 +8,8 @@ import {
 } from "@ionic/react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 
+// TODO: once comercialized, use google maps https://ionicframework.com/docs/native/google-maps
+
 const Map: React.FC = () => {
   return (
     <IonPage>

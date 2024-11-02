@@ -1,8 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
-import {
-  LocationIQAutocompleteResult,
-  LocationIQReverseResult,
-} from "../utils/types";
+import { LocationIQAutocompleteResult, LocationIQReverseResult } from "./types";
 
 const LOCATIONIQ_ACCESS_TOKEN = process.env.LOCATIONIQ_ACCESS_TOKEN;
 

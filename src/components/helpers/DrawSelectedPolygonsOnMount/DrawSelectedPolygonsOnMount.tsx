@@ -1,7 +1,7 @@
 import { circle, geoJSON } from "leaflet";
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
-import { isCircle, isPolygon, TSelectedArea } from "../../../utils/types";
+import { isCircle, isPolygon, TSelectedArea } from "../../../lib/types";
 
 export function DrawSelectedPolygonsOnMount({
   selectedArea,

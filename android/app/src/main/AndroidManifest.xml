@@ -18,8 +18,8 @@
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
         </activity>
@@ -33,14 +33,29 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- https://ionicframework.com/docs/native/camera -->
+        <service android:name="com.google.android.gms.metadata.ModuleDependencies"
+                 android:enabled="false"
+                 android:exported="false"
+                 tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES"/>
+            </intent-filter>
+            <meta-data android:name="photopicker_activity:0:required" android:value=""/>
+        </service>
     </application>
 
     <!-- Permissions -->
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- For Geolocation -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-feature android:name="android.hardware.location.gps" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!-- https://capacitorjs.com/docs/apis/background-runner#geolocation-1 -->
+    <!-- For Geolocation and Background Runner -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-feature android:name="android.hardware.location.gps"/>
+
+    <!--https://capacitorjs.com/docs/apis/background-runner#local-notifications-->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 </manifest>

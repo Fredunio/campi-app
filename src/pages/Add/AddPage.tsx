@@ -7,16 +7,16 @@ import {
   IonContent,
   IonGrid,
   IonHeader,
-  IonImg,
   IonPage,
   IonRow,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
+import React from "react";
 
-const Add: React.FC = () => {
+export default function AddPage() {
   return (
-    <IonPage>
+    <>
       <IonHeader className="shadow-none">
         <IonToolbar>
           <IonButtons slot="start">
@@ -33,8 +33,7 @@ const Add: React.FC = () => {
                 style={{ borderRadius: `0px` }}
                 className="flex items-center justify-center h-full p-0 m-0 bg-cover shadow-none bg-location-button "
               >
-                <div className="absolute w-full h-full border-8 border-b-4 border-white border-solid bg-black/40" />
-
+                <div className="absolute w-full h-full border-b-2 border-[var(--ion-text-color)] border-solid bg-black/40" />
                 <IonButton
                   color={"dark"}
                   size="large"
@@ -54,8 +53,7 @@ const Add: React.FC = () => {
                 style={{ borderRadius: `0px` }}
                 className="flex items-center justify-center w-full h-full p-0 m-0 shadow-none"
               >
-                <div className="absolute w-full h-full border-8 border-t-4 border-white border-solid bg-black/40" />
-
+                <div className="absolute w-full h-full border-[var(--ion-text-color)] border-t-1  border-solid bg-black/40" />
                 <IonButton
                   color={"dark"}
                   size="large"
@@ -71,8 +69,6 @@ const Add: React.FC = () => {
           </IonRow>
         </IonGrid>
       </IonContent>
-    </IonPage>
+    </>
   );
-};
-
-export default Add;
+}

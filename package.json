@@ -1,5 +1,5 @@
 {
-  "name": "campi-app",
+  "name": "campi",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -14,17 +14,22 @@
     "knip": "knip"
   },
   "dependencies": {
+    "@capacitor/action-sheet": "^6.0.2",
     "@capacitor/android": "6.1.0",
     "@capacitor/app": "6.0.0",
+    "@capacitor/camera": "^6.1.0",
     "@capacitor/core": "6.1.0",
+    "@capacitor/dialog": "^6.0.1",
     "@capacitor/geolocation": "^6.0.1",
     "@capacitor/haptics": "6.0.0",
     "@capacitor/keyboard": "6.0.1",
+    "@capacitor/share": "^6.0.2",
     "@capacitor/status-bar": "6.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@ionic/pwa-elements": "^3.3.0",
     "@ionic/react": "^8.0.0",
     "@ionic/react-router": "^8.0.0",
+    "@ionic/storage": "^4.0.0",
     "@supabase/supabase-js": "^2.44.4",
     "@tanstack/react-query": "^5.51.16",
     "@trapezedev/configure": "^7.0.10",
@@ -35,7 +40,7 @@
     "axios": "^1.7.7",
     "boring-avatars": "^1.10.2",
     "clsx": "^2.1.1",
-    "ionicons": "^7.0.0",
+    "ionicons": "^7.4.0",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "leaflet.markercluster": "^1.5.3",
@@ -75,6 +80,7 @@
     "terser": "^5.4.0",
     "typescript": "^5.5.4",
     "vite": "~5.2.0",
+    "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^0.34.6"
   },
   "description": "Campi app"

@@ -1,19 +1,17 @@
 import {
   IonAvatar,
-  IonButton,
-  IonButtons,
   IonHeader,
-  IonIcon,
   IonTitle,
   IonToolbar,
   useIonRouter,
 } from "@ionic/react";
-import {
-  chatboxEllipsesOutline,
-  notificationsOutline,
-  searchOutline,
-} from "ionicons/icons";
 
+import HeaderActionButtons from "../HeaderActionButtons/HeaderActionButtons";
+import SearchModal from "../../../Modals/SearchModal/SearchModal";
+import MessagesModal from "../../../Modals/MessagesModal/MessagesModal";
+import NotificationsModal from "../../../Modals/NotificationsModal/NotificationsModal";
+
+// TODO: extract to different header components, like DashboardHeader, JournalHeader, etc.
 export default function HomeHeader() {
   const router = useIonRouter();
 
@@ -24,6 +22,8 @@ export default function HomeHeader() {
 
   return (
     <IonHeader translucent={true}>
+      <MessagesModal />
+      <NotificationsModal />
       <IonToolbar>
         {inDashboard ? (
           <div className="flex items-center">
@@ -40,25 +40,38 @@ export default function HomeHeader() {
             Journal 📒
           </IonTitle>
         ) : (
-          <IonTitle size="large">Campi 🏕️</IonTitle>
+          <IonTitle className="font-bold" size="large">
+            Campi 🏕️
+          </IonTitle>
         )}
-
         {/* <IonTitle size="large">Campi 🏕️</IonTitle> */}
+        {/* TODO: change to more contrasted colors */}
+        <HeaderActionButtons />
+      </IonToolbar>
+    </IonHeader>
+  );
+}
 
-        <IonButtons slot="end">
-          <IonButton shape="round" id="open-search-modal">
+{
+  /* <IonButtons slot="end" className="self-stretch">
+          <IonButton color="dark" shape="round" id="open-search-modal">
             <IonIcon slot="icon-only" icon={searchOutline}></IonIcon>
           </IonButton>
 
           <IonButton shape="round" id="open-messages-modal">
-            <IonIcon slot="icon-only" icon={chatboxEllipsesOutline}></IonIcon>
+            <IonIcon
+              color="dark"
+              slot="icon-only"
+              icon={chatboxEllipsesOutline}
+            ></IonIcon>
           </IonButton>
 
           <IonButton shape="round" id="open-notifications-modal">
-            <IonIcon slot="icon-only" icon={notificationsOutline}></IonIcon>
+            <IonIcon
+              color="dark"
+              slot="icon-only"
+              icon={notificationsOutline}
+            ></IonIcon>
           </IonButton>
-        </IonButtons>
-      </IonToolbar>
-    </IonHeader>
-  );
+        </IonButtons> */
 }

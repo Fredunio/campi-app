@@ -1,0 +1,15 @@
+/* ion-accordion ion-item[slot="header"] {
+  --color: red;
+  background-color: transparent;
+} */
+
+ion-acccordion::part(header) ion-item[slot="header"] {
+  --color: green;
+  border: 4px solid lime;
+  background-color: transparent;
+}
+
+ion-acccordion ion-item[slot="header"] {
+  background-color: transparent;
+  border: 4px solid rgba(var(--ion-color-secondary), 0.5);
+}

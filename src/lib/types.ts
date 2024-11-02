@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/database.types";
 import { Circle, Polygon } from "leaflet";
+import { feedTypes } from "./constants";
 
 export type TypedSupabaseClient = SupabaseClient<Database>;
 
@@ -73,3 +74,4 @@ export function isCircle(layer: object): layer is Circle<any> {
 export function isPolygon(layer: object): layer is Polygon<any> {
   return (layer as Polygon<any>).getLatLngs !== undefined;
 }
+export type TFeedType = (typeof feedTypes)[keyof typeof feedTypes];

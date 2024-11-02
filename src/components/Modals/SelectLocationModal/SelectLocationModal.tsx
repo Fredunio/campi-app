@@ -24,10 +24,10 @@ import {
 import { mapTileProvider } from "../../../lib/map";
 import InvalidateMapSize from "../../helpers/InvalidateMapSize/InvalidateMapSize";
 import { Circle, DrawEvents, LatLng, Layer, Polygon } from "leaflet";
-import { defaultPosition } from "../../../lib/variables";
+import { defaultPosition } from "../../../lib/constants";
 import { area, centroid } from "@turf/turf";
 import { DrawSelectedPolygonsOnMount } from "../../helpers/DrawSelectedPolygonsOnMount/DrawSelectedPolygonsOnMount";
-import { isCircle, isPolygon, TSelectedArea } from "../../../utils/types";
+import { isCircle, isPolygon, TSelectedArea } from "../../../lib/types";
 
 // For accessing the _leaflet_id internal property
 declare module "leaflet" {

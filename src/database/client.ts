@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "./database.types";
-import { TypedSupabaseClient } from "../utils/types";
+import { TypedSupabaseClient } from "../lib/types";
 import { useMemo } from "react";
 
 const anonKey = process.env["ANON_KEY"];

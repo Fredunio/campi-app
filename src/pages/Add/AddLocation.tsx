@@ -1,5 +1,9 @@
 import {
+  AccordionGroupCustomEvent,
+  IonAccordion,
+  IonAccordionGroup,
   IonButton,
+  IonCheckbox,
   IonChip,
   IonContent,
   IonIcon,
@@ -7,6 +11,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonLoading,
   IonPage,
   IonRadio,
   IonRadioGroup,
@@ -14,8 +19,9 @@ import {
   IonSelectOption,
   IonSpinner,
   IonTextarea,
+  useIonLoading,
 } from "@ionic/react";
-import GoBackHeader from "../components/Layout/Headers/GoBackHeader/GoBackHeader";
+import GoBackHeader from "../../components/Layout/Headers/GoBackHeader/GoBackHeader";
 import {
   add,
   closeCircle,
@@ -27,7 +33,7 @@ import {
   trashBinOutline,
 } from "ionicons/icons";
 import { useCallback, useEffect, useRef, useState } from "react";
-import FormHeaderDivider from "../components/Layout/FormHeaderDivider/FormHeaderDivider";
+import FormHeaderDivider from "../../components/Layout/FormHeaderDivider/FormHeaderDivider";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -36,34 +42,38 @@ import {
   fileListToUrlArray,
   getFileExtension,
   isErrorInput,
-} from "../utils/helpers";
-import FormErrorText from "../components/Layout/Forms/FormErrorText";
-import FormPreviewImages from "../components/Layout/Forms/FormPreviewImages";
+} from "../../utils/helpers";
 import {
   defaultPosition,
   IMAGE_EXTENSIONS,
   MAX_IMAGE_SIZE,
-} from "../lib/variables";
+} from "../../lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import {
   getLocationCategories,
   getLocationSizes,
   getLocationTypes,
-} from "../database/models/location";
-import useSupabaseBrowser from "../database/client";
-import { getConditions } from "../database/models/condition";
-import { capitalizeFirstLetter } from "../utils/helpers";
-import SelectLocationModal from "../components/Modals/SelectLocationModal/SelectLocationModal";
-import { getEquipments } from "../database/models/equipment";
+} from "../../database/models/location";
+import useSupabaseBrowser from "../../database/client";
+import { getConditions } from "../../database/models/condition";
+import { capitalizeFirstLetter } from "../../utils/helpers";
+import SelectLocationModal from "../../components/Modals/SelectLocationModal/SelectLocationModal";
+import { getEquipments } from "../../database/models/equipment";
 import {
   autocompleteGeolocationSearch,
   reverseGeocode,
-} from "../lib/geo_search";
+} from "../../lib/geo_search";
 import { Geolocation, Position } from "@capacitor/geolocation";
 import { centroid } from "@turf/turf";
 import { LatLng, Layer } from "leaflet";
-import { LocationIQAutocompleteResult, TSelectedArea } from "../utils/types";
-import CheckInButton from "../components/Buttons/CheckInButton";
+import { LocationIQAutocompleteResult, TSelectedArea } from "../../lib/types";
+import FormErrorText from "../../components/Layout/Forms/FormErrorText";
+import FormPreviewImages from "../../components/Layout/Forms/FormPreviewImages";
+import MonthPickerButton from "../../components/Buttons/MonthPickerButton/MonthPickerButton";
+import MonthIntervalPicker from "../../components/FormElements/MonthIntervalPicker";
+import CheckInButton from "../../components/Buttons/CheckInButton/CheckInButton";
+import React from "react";
+import AccordionMonthInterval from "@/components/FormElements/AccordionMonthInterval/AccordionMonthInterval";
 
 const NewLocationInputsSchema = yup.object().shape({
   name: yup.string().required().min(3),
@@ -110,21 +120,22 @@ const NewLocationInputsSchema = yup.object().shape({
     }),
   description: yup.string().required(),
   address: yup.string().required(),
-  conditions: yup.array().of(yup.string()).notRequired(),
-  features: yup.array().of(yup.string()).notRequired(),
-  equipments: yup.array().of(yup.string()).notRequired(),
-  tagInput: yup.string().notRequired(),
-  tags: yup.array().of(yup.string()).required(),
+  conditions: yup.array().of(yup.string()).optional(),
+  features: yup.array().of(yup.string()).optional(),
+  equipments: yup.array().of(yup.string()).optional(),
+  tagInput: yup.string().optional(),
+  tags: yup.array().of(yup.string()).optional(),
   visibility: yup.string().oneOf(["public", "private"]).required(),
-  checkedIn: yup.boolean(),
+  checkedIn: yup.boolean().optional(),
 });
 
 type TNewLocationInputsSchema = yup.InferType<typeof NewLocationInputsSchema>;
 
 const selectLocationModalId = "add-location-select-location-modal";
 
-// TODO: add camera
-// Maybe: change select inputs to modal with icons and search
+// TODO: implement camera https://ionicframework.com/docs/native/camera
+// TODO: implement native geolocation https://ionicframework.com/docs/native/geolocation
+// Maybe: change select inputs to modal with icons and search, where there is a lot of options
 const AddLocation: React.FC = () => {
   const {
     register,
@@ -146,6 +157,10 @@ const AddLocation: React.FC = () => {
 
   const supabase = useSupabaseBrowser();
 
+  // https://ionicframework.com/docs/api/loading
+  const [present, dismiss] = useIonLoading();
+
+  // TODO: query all app data at once
   const {
     data: categories,
     isLoading: categoriesLoading,
@@ -202,7 +217,6 @@ const AddLocation: React.FC = () => {
 
   const resultRefs = useRef<(HTMLIonItemElement | null)[]>([]);
 
-  // TODO: Add type for searchResults
   const [searchResults, setSearchResults] = useState<
     LocationIQAutocompleteResult[] | undefined
   >([]);
@@ -219,7 +233,12 @@ const AddLocation: React.FC = () => {
 
   const [checkInBtnLoading, setCheckInBtnLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<TNewLocationInputsSchema> = (data) => {
+  const onSubmit: SubmitHandler<TNewLocationInputsSchema> = async (data) => {
+    // TODO: Add location to the database, show loading spinner
+    const r = await present({
+      message: "Adding location...",
+      duration: 3000,
+    });
     console.log(data);
   };
 
@@ -370,6 +389,12 @@ const AddLocation: React.FC = () => {
     }
   }, []);
 
+  const onSelectAccordion = (ev: AccordionGroupCustomEvent) => {
+    // const collapsedItems = values.filter((value) => value !== ev.detail.value);
+    const selectedValue = ev.detail.value;
+    const isExpanded = ev.detail.value !== undefined;
+  };
+
   const imagesField = register("images", { required: true });
 
   const areImages = previewImages && previewImages.length > 0;
@@ -407,7 +432,6 @@ const AddLocation: React.FC = () => {
           />
 
           <IonSelect
-            placeholder="Select Category"
             interface="alert"
             multiple={false}
             cancelText="Cancel"
@@ -450,6 +474,7 @@ const AddLocation: React.FC = () => {
               ))}
           </IonSelect>
 
+          {/* TODO: Change */}
           <IonSelect
             placeholder="Select Size"
             interface="alert"
@@ -465,7 +490,7 @@ const AddLocation: React.FC = () => {
           >
             {sizes &&
               sizes
-                .sort((a, b) => (a.order > b.order ? 1 : -1))
+                .sort((a, b) => (a.display_order > b.display_order ? 1 : -1))
                 .map((size) => (
                   <IonSelectOption key={size.name} value={size.name}>
                     {capitalizeFirstLetter(size.name)}
@@ -475,12 +500,13 @@ const AddLocation: React.FC = () => {
 
           <FormHeaderDivider>Images</FormHeaderDivider>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 ">
             <input
               multiple={true}
+              aria-hidden="true"
               type="file"
               accept="image/jpg, image/jpeg, image/png, image/gif"
-              className="hidden aria-hidden"
+              className="hidden "
               id="image-upload"
               {...imagesField}
               onChange={(e) => {
@@ -489,7 +515,7 @@ const AddLocation: React.FC = () => {
             />
             <label
               htmlFor="image-upload"
-              className={`${areImages ? "hidden" : ""} w-full flex items-center flex-col gap-4 py-8 px-4 bg-transparent text-[var(--ion-background-color-step-300)] ion-border-radius border-[var(--ion-background-color-step-300)] border-2 border-dashed`}
+              className={`${areImages ? "hidden" : ""} w-full cursor-pointer flex items-center flex-col gap-4 py-8 px-4 bg-transparent text-[var(--ion-background-color-step-300)] ion-border-radius border-[var(--ion-background-color-step-300)] border-2 border-dashed`}
             >
               <IonIcon
                 className="w-12 h-12 "
@@ -578,7 +604,7 @@ const AddLocation: React.FC = () => {
               id={selectLocationModalId}
               expand="block"
               color={"dark"}
-              className="w-14"
+              className="self-start w-[3.75rem] h-12"
               disabled={addressButtonDisabled}
             >
               <IonIcon slot="icon-only" icon={map} />
@@ -623,7 +649,6 @@ const AddLocation: React.FC = () => {
 
           <IonSelect
             multiple={true}
-            placeholder="Select Conditions"
             cancelText="Cancel"
             okText="Okay"
             fill="outline"
@@ -642,7 +667,6 @@ const AddLocation: React.FC = () => {
 
           <IonSelect
             multiple={true}
-            placeholder="Select Features"
             cancelText="Cancel"
             okText="Okay"
             fill="outline"
@@ -661,7 +685,6 @@ const AddLocation: React.FC = () => {
 
           <IonSelect
             multiple={true}
-            placeholder="Needed Equipment"
             cancelText="Cancel"
             okText="Okay"
             fill="outline"
@@ -678,7 +701,41 @@ const AddLocation: React.FC = () => {
               ))}
           </IonSelect>
 
+          {/* https://ionicframework.com/docs/api/accordion */}
+
+          {/* TODO: If the acordion is opened - change the icon to a mark, and the month range is set to true
+            if the accordion is collapsed, change the icon to checkbox and the month range is set to false
+          */}
+          <AccordionMonthInterval
+            idFrom="add-location-month-from"
+            idTo="add-location-month-to"
+            onIonChange={onSelectAccordion}
+            value="add-location-month-interval"
+            label="Best time to visit"
+          />
+          {/* <IonAccordionGroup>
+            <IonAccordion
+              className="ion-border-radius"
+              value="add-location-month-interval"
+            >
+              <IonItem slot="header" color="light">
+                <IonLabel>Best time to visit</IonLabel>
+              </IonItem>
+              <div
+                className={`py-2 px-2   rounded-t-none  rounded-b-[var(--ion-border-radius)] border-t-0 border-[var(--ion-background-color-step-300)] border-solid border-1 `}
+                slot="content"
+              >
+                <MonthIntervalPicker
+                  idFrom="add-location-month-from"
+                  idTo="to"
+                />
+              </div>
+            </IonAccordion>
+          </IonAccordionGroup> */}
+
           <FormHeaderDivider>Additional Info</FormHeaderDivider>
+
+          {/* FIXME: fix focus navigation stoppage on tag input */}
           <IonInput
             type="text"
             fill="outline"
@@ -699,7 +756,8 @@ const AddLocation: React.FC = () => {
               <IonIcon slot="icon-only" icon={add} aria-hidden="true" />
             </IonButton>
           </IonInput>
-          <div>
+
+          <div className="mb-6">
             {tags &&
               tags.length > 0 &&
               tags.map((tag) => (
@@ -721,7 +779,7 @@ const AddLocation: React.FC = () => {
             value={getValues("visibility")}
             className="relative flex flex-row flex-wrap items-center gap-10 form-field-group"
           >
-            <label className="absolute text-xs -top-2 label-text-wrapper">
+            <label className="absolute text-xs bg-[var(--ion-background-color)] px-1 -top-2 label-text-wrapper">
               <div className="label-text">Visibility</div>
             </label>
 
@@ -753,12 +811,12 @@ const AddLocation: React.FC = () => {
             />
 
             <input
-              type="checkbox"
+              type="hidden"
               {...register("checkedIn")}
-              className="hidden"
+              className="hidden "
             />
 
-            <IonButton color={"dark"} fill="clear">
+            <IonButton shape="round" color={"dark"} fill="clear">
               <IonIcon slot="icon-only" icon={helpCircleOutline} />
             </IonButton>
           </div>
@@ -767,7 +825,8 @@ const AddLocation: React.FC = () => {
             <IonButton fill="outline" color={"danger"} className="">
               Cancel
             </IonButton>
-            <IonButton type="submit" color={"primary"} className="font-bold">
+
+            <IonButton size="large" type="submit" className="font-bold">
               Confirm
             </IonButton>
           </div>

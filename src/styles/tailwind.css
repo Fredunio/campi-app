@@ -1,6 +1,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --fade-in-from-none-opacity: 1;
+  --fade-in-from-none-duration: 0.5s;
+}
+
 ion-icon {
   --ionicon-stroke-width: 40px;
 }
@@ -10,13 +15,20 @@ ion-icon {
   display: none;
 }
 
+/* IMPORTANT: dont add @layer base */
+
 @layer components {
-  .subheader-btn {
+  /* Select first card of the feed and remove the top margin, so the subheader has even margin-Y */
+  .row--feed:first-child .card {
+    @apply mt-0;
+  }
+
+  .subheader__btn {
     @apply p-0 px-2 capitalize rounded-sm bg-transparent;
     /* border-color: var(--ion-color-primary-contrast-rgb); */
   }
 
-  .subheader-btn-activated {
+  .subheader__btn--activated {
     @apply border-transparent;
     background-color: var(--ion-color-primary);
     color: var(--ion-color-primary-contrast);
@@ -34,5 +46,38 @@ ion-icon {
 
   .ion-border-radius {
     @apply rounded-[var(--ion-border-radius)];
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  @keyframes fadeInFromNone {
+    0% {
+      display: none;
+      opacity: 0;
+    }
+
+    1% {
+      display: block;
+      opacity: 0;
+    }
+
+    100% {
+      display: block;
+      opacity: var(--fade-in-from-none-opacity);
+    }
+  }
+
+  .fade-in-overlay {
+    --fade-in-from-none-opacity: 0.5;
+    --fade-in-from-none-duration: 0.15s;
+    animation: fadeInFromNone var(--fade-in-from-none-duration) ease-in-out
+      forwards;
   }
 }

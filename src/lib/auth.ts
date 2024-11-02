@@ -1,4 +1,4 @@
-import { TypedSupabaseClient } from "../utils/types";
+import { TypedSupabaseClient } from "./types";
 
 export async function signUpWithEmail(
   supabaseClient: TypedSupabaseClient,

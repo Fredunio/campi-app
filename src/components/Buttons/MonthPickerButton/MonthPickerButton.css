@@ -1,0 +1,22 @@
+ion-datetime-button::part(native) {
+  background-color: transparent;
+  border-radius: var(--ion-border-radius);
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-datetime-button::part(native) {
+    border: 1px solid var(--ion-background-color-step-300);
+  }
+  ion-datetime-button::part(native):hover {
+    background-color: var(--ion-background-color-step-100);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  ion-datetime-button::part(native) {
+    border: 1px solid #b3b3b3;
+  }
+  ion-datetime-button::part(native):hover {
+    background-color: var(--ion-background-color-step-100);
+  }
+}

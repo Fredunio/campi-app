@@ -1,4 +1,4 @@
-import { TypedSupabaseClient } from "../../utils/types";
+import { TypedSupabaseClient } from "../../lib/types";
 
 export async function getLocationCategories(
   supabaseClient: TypedSupabaseClient

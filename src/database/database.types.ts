@@ -255,13 +255,6 @@ export type Database = {
             referencedRelation: "EntityType"
             referencedColumns: ["name"]
           },
-          {
-            foreignKeyName: "Location_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       LocationCategory: {
@@ -282,18 +275,21 @@ export type Database = {
       LocationSize: {
         Row: {
           description: string | null
+          display_order: number
           name: string
-          order: number
+          number_of_people_info: string | null
         }
         Insert: {
           description?: string | null
+          display_order?: number
           name: string
-          order?: number
+          number_of_people_info?: string | null
         }
         Update: {
           description?: string | null
+          display_order?: number
           name?: string
-          order?: number
+          number_of_people_info?: string | null
         }
         Relationships: []
       }
@@ -349,15 +345,7 @@ export type Database = {
           title?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "Post_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       Tag: {
         Row: {
@@ -434,15 +422,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "Trip_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       UserProfile: {
         Row: {
@@ -472,15 +452,7 @@ export type Database = {
           updated_at?: string
           username?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "UserProfile_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -592,4 +564,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

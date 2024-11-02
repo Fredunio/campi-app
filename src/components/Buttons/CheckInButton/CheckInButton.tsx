@@ -1,6 +1,8 @@
 import { IonButton, IonIcon, IonSpinner } from "@ionic/react";
 import { location } from "ionicons/icons";
 
+import "./CheckInButton.css";
+
 export default function CheckInButton({
   handleCheckIn,
   checkedIn,
@@ -24,7 +26,7 @@ export default function CheckInButton({
     >
       {checkedIn ? "Checked" : "Check In"}
       {loading ? (
-        <IonSpinner slot="end"></IonSpinner>
+        <IonSpinner className="ml-2" slot="end" />
       ) : (
         <IonIcon slot="end" icon={location} />
       )}

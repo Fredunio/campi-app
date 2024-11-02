@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import GoBackHeader from "../components/Layout/Headers/GoBackHeader/GoBackHeader";
+import GoBackHeader from "../../components/Layout/Headers/GoBackHeader/GoBackHeader";
 
 const AddEvent: React.FC = () => {
   return (

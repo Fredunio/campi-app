@@ -14,7 +14,7 @@ export default function FormPreviewImages({
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       {images.map((image, index) => (
         <div key={index} className="relative">
           <img

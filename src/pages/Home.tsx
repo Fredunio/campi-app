@@ -22,6 +22,9 @@ import NotificationsModal from "../components/Modals/NotificationsModal/Notifica
 import { add, bonfire, location, pin, pinOutline } from "ionicons/icons";
 import HomeSubheader from "../components/Layout/Headers/HomeSubheader/HomeSubheader";
 import { useCallback, useRef, useState } from "react";
+import { TFeedType } from "../lib/types";
+import { useParams } from "react-router";
+import clsx from "clsx";
 
 const dummyData = [
   {
@@ -83,6 +86,8 @@ const Home: React.FC = () => {
       event.detail.complete();
     }, 2000);
   }
+  const [feedType, setFeedType] = useState<TFeedType>("all");
+  // let { feed } = useParams();
 
   // state needed to refresh component, so that the fab activated property can change
   const fabRef = useRef<HTMLIonFabElement>(null);
@@ -99,16 +104,19 @@ const Home: React.FC = () => {
   return (
     <IonPage id="main-content">
       <HomeHeader />
-      {fabActivated && (
-        <div
-          onClick={closeFab}
-          className="absolute z-10 w-full h-screen bg-black/70"
-        ></div>
-      )}
-      <IonContent fixedSlotPlacement="before">
-        <SearchModal />
-        <MessagesModal />
-        <NotificationsModal />
+
+      {/* FAB overlay */}
+      {/* TODO: close fab on escape key press */}
+      <div
+        onClick={closeFab}
+        aria-hidden="true"
+        // className="absolute z-10 w-full h-screen transition-all bg-black/70"
+        className={clsx(
+          "absolute z-10 w-full h-screen transition-opacity bg-black",
+          fabActivated ? "fade-in-overlay" : "hidden"
+        )}
+      />
+      <IonContent className="relative" fixedSlotPlacement="before">
         <IonFab
           onClick={() => setFabOpen(!fabOpen)}
           ref={fabRef}
@@ -116,7 +124,7 @@ const Home: React.FC = () => {
           vertical="bottom"
           horizontal="end"
         >
-          <IonFabButton aria-label="Add New Content">
+          <IonFabButton size="small" aria-label="Add New Content">
             <IonIcon icon={add}></IonIcon>
           </IonFabButton>
           <IonFabList
@@ -129,29 +137,41 @@ const Home: React.FC = () => {
             <IonButton fill="outline" color={"dark"}>
               Event
             </IonButton> */}
-            <IonFabButton href="/add_event" color={"medium"}>
+            <IonFabButton href="/add/event" color={"medium"}>
               <IonIcon icon={bonfire}></IonIcon>
             </IonFabButton>
-            <IonFabButton href="/add_location" color={"medium"}>
+            <IonFabButton href="/add/location" color={"medium"}>
               <IonIcon icon={location}></IonIcon>
             </IonFabButton>
           </IonFabList>
         </IonFab>
 
-        <HomeSubheader />
-
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 
+        <HomeSubheader
+          // NOTE: think about selecting multiple chips
+          onChipClick={(feed) => {
+            setFeedType((currentFeedType) => {
+              if (currentFeedType === feed) {
+                return "all";
+              }
+              return feed;
+            });
+          }}
+          activeChip={feedType}
+        />
+
         <IonGrid className="p-0 m-0">
-          <div className="">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <IonRow class="p-0 m-0" key={i}>
-                <LocationCard key={i} />
-              </IonRow>
-            ))}
-          </div>
+          {/* <div className=""> */}
+          {/* TODO:  */}
+          {Array.from({ length: 10 }).map((_, i) => (
+            <IonRow class="row--feed p-0 m-0 " key={i}>
+              <LocationCard id={i.toString()} key={i} />
+            </IonRow>
+          ))}
+          {/* </div> */}
         </IonGrid>
         <IonInfiniteScroll
           onIonInfinite={(ev) => {
