@@ -1,3 +1,0 @@
-setup:
-  - project: campi
-    config: dev
