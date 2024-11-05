@@ -51,3 +51,11 @@ export async function signInWithDiscord(supabaseClient: TypedSupabaseClient) {
     provider: "discord",
   });
 }
+
+export async function signOut(supabaseClient: TypedSupabaseClient) {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    throw error;
+  }
+}
