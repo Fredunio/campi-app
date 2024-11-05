@@ -22,26 +22,19 @@ SET row_security = off;
 -- Data for Name: users; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
 --
 
-INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous") VALUES
-	('00000000-0000-0000-0000-000000000000', '8ab72056-6030-4db9-aca3-2470fa13d766', 'authenticated', 'authenticated', 'dackodev@gmail.com', NULL, '2024-10-30 00:29:33.498908+00', NULL, '', NULL, '', NULL, '', '', NULL, '2024-10-30 00:29:41.719789+00', '{"provider": "google", "providers": ["google"]}', '{"iss": "https://accounts.google.com", "sub": "104529254500570933899", "name": "Michał Dacko", "email": "dackodev@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJL29YFY8EH_uHCzSqJYI886rYG7T0sqvNBbFdcdyp5qtzkLA=s96-c", "full_name": "Michał Dacko", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJL29YFY8EH_uHCzSqJYI886rYG7T0sqvNBbFdcdyp5qtzkLA=s96-c", "provider_id": "104529254500570933899", "email_verified": true, "phone_verified": false}', NULL, '2024-10-30 00:29:33.462845+00', '2024-11-03 20:23:46.260234+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
-
+INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "confirmed_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous")
+ VALUES ('00000000-0000-0000-0000-000000000000', '35bd302a-af13-41ca-9b86-22b4e9568739', 'authenticated', 'authenticated', 'test_camper3@campi.com', '$2a$10$nL6NIegHUYMqD8Cz5/4BhuDQrYsbFr.ZZ0TlJaQwF7jAGmW/iuOby', '2024-11-05 01:59:09.682585+00', null, '', null, '', null, '', '', null, null, '{"provider": "email", "providers": ["email"]}', '{}', null, '2024-11-05 01:59:09.678824+00', '2024-11-05 01:59:09.682804+00', null, null, '', '', null, '2024-11-05 01:59:09.682585+00', '', '0', null, '', null, 'false', null, 'false'),
+  		('00000000-0000-0000-0000-000000000000', '43831627-add7-4e7b-be06-4c187cb7f10c', 'authenticated', 'authenticated', 'test_camper1@campi.com', '$2a$10$.8kDUiSmZlECViadnPZV/eGMklJDJO.XRmk/XW5WXKVEmjRbpxpBa', '2024-11-05 01:55:18.073302+00', null, '', null, '', null, '', '', null, null, '{"provider": "email", "providers": ["email"]}', '{}', null, '2024-11-05 01:55:18.069273+00', '2024-11-05 01:55:18.073505+00', null, null, '', '', null, '2024-11-05 01:55:18.073302+00', '', '0', null, '', null, 'false', null, 'false'),
+		 ('00000000-0000-0000-0000-000000000000', '7df4cf0b-b77f-41d1-af12-8b69c5f2358d', 'authenticated', 'authenticated', 'test_camper2@campi.com', '$2a$10$GRwDuSzzKb4ZdFu7RO3eTOEpRaTY.u4bk292X1KqzJLmhlSDRhoC6', '2024-11-05 01:57:42.822465+00', null, '', null, '', null, '', '', null, null, '{"provider": "email", "providers": ["email"]}', '{}', null, '2024-11-05 01:57:42.816592+00', '2024-11-05 01:57:42.822682+00', null, null, '', '', null, '2024-11-05 01:57:42.822465+00', '', '0', null, '', null, 'false', null, 'false');
 
 --
 -- Data for Name: identities; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
 --
 
-INSERT INTO "auth"."identities" ("provider_id", "user_id", "identity_data", "provider", "last_sign_in_at", "created_at", "updated_at", "id") VALUES
-	('104529254500570933899', '8ab72056-6030-4db9-aca3-2470fa13d766', '{"iss": "https://accounts.google.com", "sub": "104529254500570933899", "name": "Michał Dacko", "email": "dackodev@gmail.com", "picture": "https://lh3.googleusercontent.com/a/ACg8ocJL29YFY8EH_uHCzSqJYI886rYG7T0sqvNBbFdcdyp5qtzkLA=s96-c", "full_name": "Michał Dacko", "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJL29YFY8EH_uHCzSqJYI886rYG7T0sqvNBbFdcdyp5qtzkLA=s96-c", "provider_id": "104529254500570933899", "email_verified": true, "phone_verified": false}', 'google', '2024-10-30 00:29:33.488261+00', '2024-10-30 00:29:33.488343+00', '2024-10-30 00:29:41.714988+00', '16fbecb7-f352-4c22-9e83-4075009fdf89');
-
-
---
--- Data for Name: mfa_amr_claims; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
---
-
-INSERT INTO "auth"."mfa_amr_claims" ("session_id", "created_at", "updated_at", "authentication_method", "id") VALUES
-	('2bfa7089-d3cf-45a5-ad0e-92bf0d509359', '2024-10-30 00:29:33.521872+00', '2024-10-30 00:29:33.521872+00', 'oauth', '68f36834-4476-40fd-875c-fb6cd47344a8'),
-	('4d3fcef9-55a0-4c9c-99db-1d08ca57a7ac', '2024-10-30 00:29:41.72244+00', '2024-10-30 00:29:41.72244+00', 'oauth', 'c15e2a0a-bcf3-477a-bf84-cd8a7cbb410e');
-
+INSERT INTO "auth"."identities" ("provider_id", "user_id", "identity_data", "provider", "last_sign_in_at", "created_at", "updated_at", "email", "id")
+ VALUES ('35bd302a-af13-41ca-9b86-22b4e9568739', '35bd302a-af13-41ca-9b86-22b4e9568739', '{"sub": "35bd302a-af13-41ca-9b86-22b4e9568739", "email": "test_camper3@campi.com", "email_verified": false, "phone_verified": false}', 'email', '2024-11-05 01:59:09.680225+00', '2024-11-05 01:59:09.680274+00', '2024-11-05 01:59:09.680274+00', 'test_camper3@campi.com', '5d79eb9e-f97c-4437-a328-c1b1a7fca4b7'),
+ 		('7df4cf0b-b77f-41d1-af12-8b69c5f2358d', '7df4cf0b-b77f-41d1-af12-8b69c5f2358d', '{"sub": "7df4cf0b-b77f-41d1-af12-8b69c5f2358d", "email": "test_camper2@campi.com", "email_verified": false, "phone_verified": false}', 'email', '2024-11-05 01:57:42.818324+00', '2024-11-05 01:57:42.818372+00', '2024-11-05 01:57:42.818372+00', 'test_camper2@campi.com', 'b179770d-6a82-4129-982b-22c307ede42f'),
+  		('43831627-add7-4e7b-be06-4c187cb7f10c', '43831627-add7-4e7b-be06-4c187cb7f10c', '{"sub": "43831627-add7-4e7b-be06-4c187cb7f10c", "email": "test_camper1@campi.com", "email_verified": false, "phone_verified": false}', 'email', '2024-11-05 01:55:18.070962+00', '2024-11-05 01:55:18.071019+00', '2024-11-05 01:55:18.071019+00', 'test_camper1@campi.com', 'ea6135f8-7140-4d4d-94c8-0e4e1dc4294b');
 
 --
 -- Data for Name: Month; Type: TABLE DATA; Schema: public; Owner: postgres
