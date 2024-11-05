@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "../database/database.types";
+import { Database } from "../database/schema.gen";
 import { Circle, Polygon } from "leaflet";
 import { feedTypes } from "./constants";
 

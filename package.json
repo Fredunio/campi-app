@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "infisical run -- vite",
     "build": "tsc && vite build",
-    "update-types": "npx supabase gen types --lang=typescript --project-id \"gvfvcvzkqgutofzmijrc\" > src/database/database.types.ts",
+    "update-types": "npx supabase gen types --lang=typescript --project-id \"gvfvcvzkqgutofzmijrc\" > src/database/schema.gen.ts",
     "preview": "vite preview",
     "test.e2e": "cypress run",
     "test.unit": "vitest",
