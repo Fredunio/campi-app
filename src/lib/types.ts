@@ -2,6 +2,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../database/schema.gen";
 import { Circle, Polygon } from "leaflet";
 import { feedTypes } from "./constants";
+import * as yup from "yup";
+import { authSchema } from "@/lib/schemas/authSchema";
 
 export type TypedSupabaseClient = SupabaseClient<Database>;
 
@@ -75,3 +77,9 @@ export function isPolygon(layer: object): layer is Polygon<any> {
   return (layer as Polygon<any>).getLatLngs !== undefined;
 }
 export type TFeedType = (typeof feedTypes)[keyof typeof feedTypes];
+
+export type TAuthSchema = yup.InferType<typeof authSchema>;
+
+export type TRedirectTo = {
+  redirectTo: string | undefined | null;
+};

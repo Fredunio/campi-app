@@ -74,64 +74,15 @@ import MonthIntervalPicker from "../../components/FormElements/MonthIntervalPick
 import CheckInButton from "../../components/Buttons/CheckInButton/CheckInButton";
 import React from "react";
 import AccordionMonthInterval from "@/components/FormElements/AccordionMonthInterval/AccordionMonthInterval";
+import { Capacitor } from "@capacitor/core";
+import { newLocationSchema } from "@/lib/schemas/newLocationSchema";
 
-const NewLocationInputsSchema = yup.object().shape({
-  name: yup.string().required().min(3),
-  category: yup.string().required(),
-  type: yup.string().required(),
-  size: yup.string().required(),
-  images: yup
-    .mixed()
-    .notRequired()
-    .test({
-      message: "Please provide a supported file type",
-      test: (fileArray, context) => {
-        if (!fileArray) {
-          return true;
-        }
-        if (!(fileArray instanceof Array)) {
-          return false;
-        }
-
-        for (let i = 0; i < fileArray.length; i++) {
-          const file = fileArray[i];
-          const extension = getFileExtension(file.name);
-          if (!extension || !IMAGE_EXTENSIONS.includes(extension)) {
-            context?.createError();
-            break;
-          }
-        }
-      },
-    })
-    .test({
-      message: `File too big, can't exceed ${MAX_IMAGE_SIZE}`,
-      test: (fileArray) => {
-        if (!(fileArray instanceof Array)) {
-          return false;
-        }
-
-        for (let i = 0; i < fileArray.length; i++) {
-          const file = fileArray[i];
-          if (file.size < MAX_IMAGE_SIZE) {
-            return false;
-          }
-        }
-      },
-    }),
-  description: yup.string().required(),
-  address: yup.string().required(),
-  conditions: yup.array().of(yup.string()).optional(),
-  features: yup.array().of(yup.string()).optional(),
-  equipments: yup.array().of(yup.string()).optional(),
-  tagInput: yup.string().optional(),
-  tags: yup.array().of(yup.string()).optional(),
-  visibility: yup.string().oneOf(["public", "private"]).required(),
-  checkedIn: yup.boolean().optional(),
-});
-
-type TNewLocationInputsSchema = yup.InferType<typeof NewLocationInputsSchema>;
+type TNewLocationSchema = yup.InferType<typeof newLocationSchema>;
 
 const selectLocationModalId = "add-location-select-location-modal";
+
+const isCameraAvailable = Capacitor.isPluginAvailable("Camera");
+const isGeolocationAvailable = Capacitor.isPluginAvailable("Geolocation");
 
 // TODO: implement camera https://ionicframework.com/docs/native/camera
 // TODO: implement native geolocation https://ionicframework.com/docs/native/geolocation
@@ -145,14 +96,26 @@ const AddLocation: React.FC = () => {
     setValue,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(NewLocationInputsSchema),
+    resolver: yupResolver(newLocationSchema),
     defaultValues: {
+      name: "",
+      category: "",
+      type: "",
+      size: "",
+      images: [],
+      description: "",
+      address: "",
+      conditions: [],
+      features: [],
+      equipments: [],
       tagInput: "",
       visibility: "public",
       tags: [],
       checkedIn: false,
     },
-    reValidateMode: "onBlur",
+    mode: "onBlur",
+
+    // reValidateMode: "onBlur",
   });
 
   const supabase = useSupabaseBrowser();
@@ -233,7 +196,7 @@ const AddLocation: React.FC = () => {
 
   const [checkInBtnLoading, setCheckInBtnLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<TNewLocationInputsSchema> = async (data) => {
+  const onSubmit: SubmitHandler<TNewLocationSchema> = async (data) => {
     // TODO: Add location to the database, show loading spinner
     const r = await present({
       message: "Adding location...",

@@ -7,82 +7,102 @@ import {
   IonContent,
   IonImg,
   IonInput,
-  IonInputPasswordToggle,
   IonPage,
   IonText,
+  useIonToast,
 } from "@ionic/react";
+import { Color } from "@ionic/core";
 import { Capacitor } from "@capacitor/core";
 import clsx from "clsx";
 import { useForm } from "react-hook-form";
-import { z, ZodType } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import SignupHeader from "../components/Layout/Headers/SignupHeader/SignupHeader";
 import {
   signInWithDiscord,
   signInWithFacebook,
   signInWithGoogle,
+  signUpWithEmail,
 } from "../lib/auth";
 import useSupabaseBrowser from "../database/client";
+import { useCallback, useEffect, useState } from "react";
+import { authSchema } from "@/lib/schemas/authSchema";
+import { TAuthSchema } from "@/lib/types";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useRedirectTo } from "@/hooks/useRedirectTo";
+import { useHistory } from "react-router";
 
 const isNative = Capacitor.isNativePlatform();
-
-const signUpSchema: ZodType = z.object({
-  email: z.string().email(),
-  // password must be at least 8 characters long and contain at least
-  // one uppercase letter, one lowercase letter, and one special character
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .max(100, "Password must be at most 100 characters long")
-    .superRefine((password, ctx) => {
-      const capitalLetter = /[A-Z]/.test(password);
-      if (!capitalLetter) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.invalid_string,
-          message: "Password must contain at least one uppercase letter",
-          validation: "base64",
-        });
-      }
-
-      const lowercaseLetter = /[a-z]/.test(password);
-      if (!lowercaseLetter) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.invalid_string,
-          message: "Password must contain at least one lowercase letter",
-          validation: "base64",
-        });
-      }
-
-      const specialCharacter = /[!@#$%^&*]/.test(password);
-      if (!specialCharacter) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.invalid_string,
-          message: "Password must contain at least one special character",
-          validation: "base64",
-        });
-      }
-      return "Password must contain at least one uppercase letter, one lowercase letter, and one special character";
-    }),
-});
-
-type SchemaProps = z.infer<typeof signUpSchema>;
 
 const SignUp: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    watch,
+    formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
-    resolver: zodResolver(signUpSchema),
+    resolver: yupResolver(authSchema),
+    mode: "onBlur",
   });
 
   const supabaseClient = useSupabaseBrowser();
-  console.log("pwd:", watch("password"));
+
+  const [presentToast] = useIonToast();
+  const [redirectTo] = useRedirectTo();
+  const history = useHistory();
+
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      await signInWithGoogle(supabaseClient);
+    } catch (error) {
+      console.error(error);
+      presentToast({
+        message: "An error occurred while signing in with Google",
+        color: "danger",
+      });
+    }
+  }, [supabaseClient, presentToast]);
+
+  const handleFacebookSignIn = useCallback(async () => {
+    try {
+      await signInWithFacebook(supabaseClient);
+    } catch (error) {
+      console.error(error);
+      presentToast({
+        message: "An error occurred while signing in with Facebook",
+        color: "danger",
+      });
+    }
+  }, [supabaseClient, presentToast]);
+
+  const handleDiscordSignIn = useCallback(async () => {
+    try {
+      await signInWithDiscord(supabaseClient);
+    } catch (error) {
+      console.error(error);
+      presentToast({
+        message: "An error occurred while signing in with Discord",
+        color: "danger",
+      });
+    }
+  }, [supabaseClient, presentToast]);
+
+  const handleEmailSignUp = useCallback(
+    async (data: TAuthSchema) => {
+      try {
+        await signUpWithEmail(supabaseClient, data.email, data.password);
+        history.replace(redirectTo);
+      } catch (error) {
+        console.error(error);
+        presentToast({
+          message: "An error occurred while signing up with email",
+          color: "danger",
+        });
+      }
+    },
+    [supabaseClient, presentToast]
+  );
 
   return (
     <IonPage id="login-page">
@@ -98,9 +118,13 @@ const SignUp: React.FC = () => {
             <IonCardSubtitle class="text-lg">Welcome back!</IonCardSubtitle>
           </IonCardHeader>
           <form
-            onSubmit={handleSubmit((data: SchemaProps) => {
-              console.log(data);
-            })}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(async (data: TAuthSchema) => {
+                console.log("data", data);
+                await handleEmailSignUp(data);
+              })();
+            }}
             className="flex flex-col gap-2 lg:min-w-60"
           >
             <IonInput
@@ -109,8 +133,8 @@ const SignUp: React.FC = () => {
               fill="outline"
               type="email"
               placeholder="Enter your email"
-              {...register("email", { required: true })}
-            ></IonInput>
+              {...register("email")}
+            />
             {errors?.email?.message && (
               <IonText color={"danger"}>
                 <p>{errors.email.message}</p>
@@ -123,8 +147,8 @@ const SignUp: React.FC = () => {
               placeholder="********"
               type="password"
               clearOnEdit={false}
-              {...register("password", { required: true })}
-            ></IonInput>
+              {...register("password")}
+            />
             {errors?.password?.message && (
               <IonText color={"danger"}>
                 <p>{errors.password.message}</p>
@@ -148,7 +172,7 @@ const SignUp: React.FC = () => {
               color={"dark"}
               expand="full"
               size={isNative ? "large" : "default"}
-              onClick={() => signInWithGoogle(supabaseClient)}
+              onClick={() => handleGoogleSignIn()}
               shape="round"
               className="rounded-full"
             >
@@ -164,7 +188,7 @@ const SignUp: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={() => signInWithFacebook(supabaseClient)}
+              onClick={() => handleFacebookSignIn()}
             >
               <IonImg
                 src="/images/logos/facebook.png"
@@ -177,7 +201,7 @@ const SignUp: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={() => signInWithDiscord(supabaseClient)}
+              onClick={() => handleDiscordSignIn()}
             >
               <IonImg
                 src="/images/logos/discord.png"

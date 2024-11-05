@@ -53,8 +53,7 @@
     "react-leaflet-draw": "^0.20.4",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
-    "yup": "^1.4.0",
-    "zod": "^3.23.8"
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@capacitor/cli": "6.1.0",

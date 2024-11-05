@@ -18,13 +18,45 @@ import {
   signInWithDiscord,
   signInWithFacebook,
   signInWithGoogle,
+  signInWithPassword,
 } from "../lib/auth";
 import useSupabaseBrowser from "../database/client";
+import { useForm } from "react-hook-form";
+import { useCallback } from "react";
+import { authSchema } from "@/lib/schemas/authSchema";
+import { TAuthSchema } from "@/lib/types";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useHistory, useLocation } from "react-router";
 
 const isNative = Capacitor.isNativePlatform();
 
 const Login: React.FC = () => {
-  const supabaseClient = useSupabaseBrowser();
+  const supabase = useSupabaseBrowser();
+  const history = useHistory();
+  const location = useLocation<{ redirectTo: string | undefined | null }>();
+  // location.state.redirectTo
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    resolver: yupResolver(authSchema),
+    mode: "onBlur",
+  });
+
+  const handleEmailLogin = useCallback(
+    async (data: TAuthSchema) => {
+      await signInWithPassword(supabase, data.email, data.password);
+      const redirectPath = location.state?.redirectTo || "/dashboard";
+      history.replace(redirectPath);
+    },
+    [history, location.state, supabase]
+  );
 
   return (
     <IonPage id="login-page">
@@ -39,23 +71,48 @@ const Login: React.FC = () => {
             <IonCardTitle class="text-4xl font-bold">Campi 🏕️</IonCardTitle>
             <IonCardSubtitle class="text-lg">Welcome back!</IonCardSubtitle>
           </IonCardHeader>
-          <form className="flex flex-col gap-2 lg:min-w-60">
+          <form
+            // onSubmit={handleSubmit(handleEmailLogin)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              console.log("handleSubmit");
+              handleSubmit(async (data: TAuthSchema) => {
+                console.log("data", data);
+                await handleEmailLogin(data);
+              })();
+            }}
+            className="flex flex-col gap-2 lg:min-w-60"
+          >
             <IonInput
               type="email"
               label="Email"
               labelPlacement="floating"
               fill="outline"
               placeholder="Enter your email"
+              {...register("email")}
             ></IonInput>
+
+            {errors?.email?.message && (
+              <IonText color={"danger"}>
+                <p>{errors.email.message}</p>
+              </IonText>
+            )}
             <IonInput
               type="password"
               label="Password"
               labelPlacement="floating"
               fill="outline"
               placeholder="********"
+              {...register("password")}
             ></IonInput>
+
+            {errors?.password?.message && (
+              <IonText color={"danger"}>
+                <p>{errors.password.message}</p>
+              </IonText>
+            )}
             <IonButton
-              className="font-semibold"
+              className="font-semibold rounded-xl"
               color={"success"}
               expand="full"
               type="submit"
@@ -73,7 +130,7 @@ const Login: React.FC = () => {
               color={"dark"}
               expand="full"
               size={isNative ? "large" : "default"}
-              onClick={() => signInWithGoogle(supabaseClient)}
+              onClick={() => signInWithGoogle(supabase)}
               shape="round"
               className="rounded-full"
             >
@@ -89,7 +146,7 @@ const Login: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={() => signInWithFacebook(supabaseClient)}
+              onClick={() => signInWithFacebook(supabase)}
             >
               <IonImg
                 src="/images/logos/facebook.png"
@@ -102,7 +159,7 @@ const Login: React.FC = () => {
               expand="full"
               shape="round"
               size={isNative ? "large" : "default"}
-              onClick={() => signInWithDiscord(supabaseClient)}
+              onClick={() => signInWithDiscord(supabase)}
             >
               <IonImg
                 src="/images/logos/discord.png"
