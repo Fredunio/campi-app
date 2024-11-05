@@ -46,7 +46,8 @@ import {
 import {
   defaultPosition,
   IMAGE_EXTENSIONS,
-  MAX_IMAGE_SIZE,
+  MAX_LOCATION_IMAGES,
+  MAX_LOCATION_IMAGES_SIZE_BYTES,
 } from "../../lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import {
