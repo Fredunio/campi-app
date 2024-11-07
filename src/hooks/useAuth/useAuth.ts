@@ -4,9 +4,10 @@ import { useContext } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 
 const useAuth = () => {
-  const { user, loading } = useContext(AuthContext);
+  const { user, userProfile, loading } = useContext(AuthContext);
   return {
     user,
+    userProfile,
     loading,
   };
 };

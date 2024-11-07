@@ -1,4 +1,4 @@
-import { supportsLocalStorage } from "@/lib/functions/supportsLocalStorage";
+import { supportsLocalStorage } from "@/lib/helpers/supportsLocalStorage";
 import { SupportedStorage } from "@supabase/supabase-js";
 
 // NOTE: This is a custom storage adapter that can be used on server-side, but I doubt it's necessary

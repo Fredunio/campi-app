@@ -1,27 +1,23 @@
 import {
-  IonAvatar,
-  IonButton,
   IonButtons,
   IonHeader,
-  IonIcon,
-  IonLabel,
-  IonMenu,
   IonMenuButton,
-  IonSegment,
-  IonSegmentButton,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import {
-  chatboxEllipsesOutline,
-  searchOutline,
-  settings,
-  settingsOutline,
-} from "ionicons/icons";
-import React from "react";
+
 import HeaderActionButtons from "../HeaderActionButtons/HeaderActionButtons";
+import useAuth from "@/hooks/useAuth/useAuth";
+import UserAvatar from "@/components/Avatars/UserAvatar/UserAvatar";
 
 export default function DashboardHeader() {
+  const { loading, user, userProfile } = useAuth();
+  const displayName =
+    userProfile?.username ||
+    (userProfile?.first_name && userProfile?.last_name) ||
+    userProfile?.first_name + " " + userProfile?.last_name ||
+    user?.email;
+
   return (
     <IonHeader>
       <IonToolbar className="pl-1">
@@ -29,13 +25,10 @@ export default function DashboardHeader() {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonAvatar className="w-8 h-8">
-            <img
-              alt="Silhouette of a person's head"
-              src="https://ionicframework.com/docs/img/demos/avatar.svg"
-            />
-          </IonAvatar>
-          <IonTitle className="pl-2 font-bold">John Doe</IonTitle>
+          {/* UserAvatar should be based on email, so it looks the same */}
+          {/* If based on username - different looks if the user changes it */}
+          {/* <UserAvatar name={user?.email} size={40} /> */}
+          <IonTitle className="pl-2 font-bold">{user?.email}</IonTitle>
         </div>
         <HeaderActionButtons />
       </IonToolbar>

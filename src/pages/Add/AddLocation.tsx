@@ -45,7 +45,7 @@ import {
 } from "../../utils/helpers";
 import {
   defaultPosition,
-  IMAGE_EXTENSIONS,
+  IMAGE_MIME_TYPES,
   MAX_LOCATION_IMAGES,
   MAX_LOCATION_IMAGES_SIZE_BYTES,
 } from "../../lib/constants";
@@ -77,6 +77,8 @@ import React from "react";
 import AccordionMonthInterval from "@/components/FormElements/AccordionMonthInterval/AccordionMonthInterval";
 import { Capacitor } from "@capacitor/core";
 import { newLocationSchema } from "@/lib/schemas/newLocationSchema";
+import { getFeatures } from "@/database/models/feature";
+import { getLocationFormData } from "@/database/queries/getLocationFormData";
 
 type TNewLocationSchema = yup.InferType<typeof newLocationSchema>;
 
@@ -124,59 +126,67 @@ const AddLocation: React.FC = () => {
   // https://ionicframework.com/docs/api/loading
   const [present, dismiss] = useIonLoading();
 
-  // TODO: query all app data at once
-  const {
-    data: categories,
-    isLoading: categoriesLoading,
-    isError: categoriesError,
-  } = useQuery({
-    queryKey: ["add_location_categories"],
-    queryFn: () => getLocationCategories(supabase),
-  });
+  // const {
+  //   data: categories,
+  //   isLoading: categoriesLoading,
+  //   isError: categoriesError,
+  // } = useQuery({
+  //   queryKey: ["add_location_categories"],
+  //   queryFn: () => getLocationCategories(supabase),
+  // });
+
+  // const {
+  //   data: types,
+  //   isLoading: typesLoading,
+  //   isError: typesError,
+  // } = useQuery({
+  //   queryKey: ["add_location_types"],
+  //   queryFn: () => getLocationTypes(supabase),
+  // });
+
+  // const {
+  //   data: sizes,
+  //   isLoading: sizesLoading,
+  //   isError: sizesError,
+  // } = useQuery({
+  //   queryKey: ["add_location_sizes"],
+  //   queryFn: () => getLocationSizes(supabase),
+  // });
+
+  // const {
+  //   data: conditions,
+  //   isLoading: conditionsLoading,
+  //   isError: conditionsError,
+  // } = useQuery({
+  //   queryKey: ["add_location_conditions"],
+  //   queryFn: () => getConditions(supabase),
+  // });
+
+  // const {
+  //   data: features,
+  //   isLoading: featuresLoading,
+  //   isError: featuresError,
+  // } = useQuery({
+  //   queryKey: ["add_location_features"],
+  //   queryFn: () => getFeatures(supabase),
+  // });
+
+  // const {
+  //   data: equipments,
+  //   isLoading: equipmentsLoading,
+  //   isError: equipmentsError,
+  // } = useQuery({
+  //   queryKey: ["add_location_equipments"],
+  //   queryFn: () => getEquipments(supabase),
+  // });
 
   const {
-    data: types,
-    isLoading: typesLoading,
-    isError: typesError,
+    data: { categories, types, sizes, conditions, features, equipments } = {},
+    isLoading: isLoadingFormData,
+    isError: isErrorFormData,
   } = useQuery({
-    queryKey: ["add_location_types"],
-    queryFn: () => getLocationTypes(supabase),
-  });
-
-  const {
-    data: sizes,
-    isLoading: sizesLoading,
-    isError: sizesError,
-  } = useQuery({
-    queryKey: ["add_location_sizes"],
-    queryFn: () => getLocationSizes(supabase),
-  });
-
-  const {
-    data: conditions,
-    isLoading: conditionsLoading,
-    isError: conditionsError,
-  } = useQuery({
-    queryKey: ["add_location_conditions"],
-    queryFn: () => getConditions(supabase),
-  });
-
-  const {
-    data: features,
-    isLoading: featuresLoading,
-    isError: featuresError,
-  } = useQuery({
-    queryKey: ["add_location_features"],
-    queryFn: () => getConditions(supabase),
-  });
-
-  const {
-    data: equipments,
-    isLoading: equipmentsLoading,
-    isError: equipmentsError,
-  } = useQuery({
-    queryKey: ["add_location_equipments"],
-    queryFn: () => getEquipments(supabase),
+    queryKey: ["add_location_form_data"],
+    queryFn: () => getLocationFormData(supabase),
   });
 
   const resultRefs = useRef<(HTMLIonItemElement | null)[]>([]);
@@ -203,6 +213,13 @@ const AddLocation: React.FC = () => {
       message: "Adding location...",
       duration: 3000,
     });
+    // Add location to the database here
+    setTimeout(() => {
+      dismiss();
+    }, 2000);
+
+    await dismiss();
+
     console.log(data);
   };
 

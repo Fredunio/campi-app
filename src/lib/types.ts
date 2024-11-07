@@ -3,7 +3,8 @@ import { Database } from "../database/schema.gen";
 import { Circle, Polygon } from "leaflet";
 import { feedTypes } from "./constants";
 import * as yup from "yup";
-import { authSchema } from "@/lib/schemas/authSchema";
+import { loginSchema } from "@/lib/schemas/loginSchema";
+import { signupSchema } from "@/lib/schemas/signupSchema";
 
 export type TypedSupabaseClient = SupabaseClient<Database>;
 
@@ -78,8 +79,8 @@ export function isPolygon(layer: object): layer is Polygon<any> {
 }
 export type TFeedType = (typeof feedTypes)[keyof typeof feedTypes];
 
-export type TAuthSchema = yup.InferType<typeof authSchema>;
-
+export type TSignupSchema = yup.InferType<typeof signupSchema>;
+export type TLoginSchema = yup.InferType<typeof loginSchema>;
 export type TRedirectTo = {
   redirectTo: string | undefined | null;
 };

@@ -41,8 +41,8 @@ import {
   ActionSheetButton,
   ActionSheetButtonStyle,
 } from "@capacitor/action-sheet";
-import { showNativeActionSheet } from "@/lib/functions/showNativeActionSheet";
-import { shareNative } from "@/lib/functions/shareNative";
+import { showNativeActionSheet } from "@/lib/helpers/showNativeActionSheet";
+import { shareNative } from "@/lib/helpers/shareNative";
 import { Share } from "@capacitor/share";
 
 // FIXME: fix icons not showing

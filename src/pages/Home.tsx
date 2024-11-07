@@ -127,16 +127,13 @@ const Home: React.FC = () => {
           <IonFabButton size="small" aria-label="Add New Content">
             <IonIcon icon={add}></IonIcon>
           </IonFabButton>
-          <IonFabList
-            side="top"
-            // className="right-0 items-end justify-items-stretch"
-          >
-            {/* <IonButton fill="outline" color={"dark"}>
-              Location
-            </IonButton>
-            <IonButton fill="outline" color={"dark"}>
-              Event
-            </IonButton> */}
+          <IonFabList side="top">
+            <IonFabButton href="/add/trip" color={"medium"}>
+              <IonIcon
+                size={"large"}
+                icon={"/images/icons/trip_icon.svg"}
+              ></IonIcon>
+            </IonFabButton>
             <IonFabButton href="/add/event" color={"medium"}>
               <IonIcon icon={bonfire}></IonIcon>
             </IonFabButton>

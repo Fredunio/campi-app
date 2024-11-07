@@ -24,8 +24,8 @@ import {
 } from "../lib/auth";
 import useSupabaseBrowser from "../database/client";
 import { useCallback, useEffect, useState } from "react";
-import { authSchema } from "@/lib/schemas/authSchema";
-import { TAuthSchema } from "@/lib/types";
+import { signupSchema } from "@/lib/schemas/signupSchema";
+import { TSignupSchema } from "@/lib/types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRedirectTo } from "@/hooks/useRedirectTo";
 import { useHistory } from "react-router";
@@ -42,7 +42,7 @@ const SignUp: React.FC = () => {
       email: "",
       password: "",
     },
-    resolver: yupResolver(authSchema),
+    resolver: yupResolver(signupSchema),
     mode: "onBlur",
   });
 
@@ -89,7 +89,7 @@ const SignUp: React.FC = () => {
   }, [supabaseClient, presentToast]);
 
   const handleEmailSignUp = useCallback(
-    async (data: TAuthSchema) => {
+    async (data: TSignupSchema) => {
       try {
         await signUpWithEmail(supabaseClient, data.email, data.password);
         history.replace(redirectTo);
@@ -120,7 +120,7 @@ const SignUp: React.FC = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSubmit(async (data: TAuthSchema) => {
+              handleSubmit(async (data: TSignupSchema) => {
                 console.log("data", data);
                 await handleEmailSignUp(data);
               })();

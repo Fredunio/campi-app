@@ -7,7 +7,6 @@ import {
   IonContent,
   IonImg,
   IonInput,
-  IonInputPasswordToggle,
   IonPage,
   IonText,
 } from "@ionic/react";
@@ -23,8 +22,8 @@ import {
 import useSupabaseBrowser from "../database/client";
 import { useForm } from "react-hook-form";
 import { useCallback } from "react";
-import { authSchema } from "@/lib/schemas/authSchema";
-import { TAuthSchema } from "@/lib/types";
+import { loginSchema } from "@/lib/schemas/loginSchema";
+import { TLoginSchema } from "@/lib/types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useHistory, useLocation } from "react-router";
 
@@ -45,12 +44,12 @@ const Login: React.FC = () => {
       email: "",
       password: "",
     },
-    resolver: yupResolver(authSchema),
+    resolver: yupResolver(loginSchema),
     mode: "onBlur",
   });
 
   const handleEmailLogin = useCallback(
-    async (data: TAuthSchema) => {
+    async (data: TLoginSchema) => {
       await signInWithPassword(supabase, data.email, data.password);
       const redirectPath = location.state?.redirectTo || "/dashboard";
       history.replace(redirectPath);
@@ -76,7 +75,7 @@ const Login: React.FC = () => {
             onSubmit={(e) => {
               e.preventDefault();
               console.log("handleSubmit");
-              handleSubmit(async (data: TAuthSchema) => {
+              handleSubmit(async (data: TLoginSchema) => {
                 console.log("data", data);
                 await handleEmailLogin(data);
               })();

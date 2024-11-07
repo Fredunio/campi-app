@@ -2,10 +2,16 @@ import { Position } from "@capacitor/geolocation";
 
 export const MAX_IMAGES_SIZE_BYTES = 5_242_880; // 5MB
 export const MAX_LOCATION_IMAGES_SIZE_BYTES = MAX_IMAGES_SIZE_BYTES;
-export const IMAGE_TYPES = ["image/png", "image/gif", "image/jpg"];
-export const IMAGE_EXTENSIONS = IMAGE_TYPES.map((type) => type.split("/")[1]);
+export const IMAGE_TYPES = [
+  "image/png",
+  "image/gif",
+  "image/jpeg",
+  "image/gif",
+];
+export const IMAGE_MIME_TYPES = IMAGE_TYPES.map((type) => type.split("/")[1]);
 export const MAX_LOCATION_IMAGES = 10;
 export const MAX_EVENT_IMAGES = 10;
+// image/png, image/gif, image/jpeg, image/gif
 
 export const feedTypes = {
   all: "all",

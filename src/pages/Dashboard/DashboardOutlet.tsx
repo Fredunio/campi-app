@@ -1,6 +1,8 @@
 import {
   IonContent,
   IonHeader,
+  IonItem,
+  IonList,
   IonMenu,
   IonPage,
   IonRouterOutlet,
@@ -9,17 +11,36 @@ import {
 } from "@ionic/react";
 import DashboardHeader from "../../components/Layout/Headers/DashboardHeader/DashboardHeader";
 import HomeHeader from "../../components/Layout/Headers/HomeHeader/HomeHeader";
-import { Route } from "react-router";
+import { Route, useHistory } from "react-router";
 import DashboardHome from "./DashboardHome";
 import DashboardSettings from "./DashboardSettings";
 import DashboardAccount from "./DashboardAccount";
 import DashboardNotifications from "./DashboardNotifications";
+import useSupabaseBrowser from "@/database/client";
+import { useCallback } from "react";
+import { signOut } from "@/lib/auth";
 
 const DashboardOutlet: React.FC = () => {
+  const history = useHistory();
+  const supabase = useSupabaseBrowser();
+  const handleLogout = useCallback(async () => {
+    try {
+      console.log("Logging out");
+
+      // await signOut(supabase);
+      const { error } = await supabase.auth.signOut();
+      console.log("signOut", { error });
+      history.push("/login");
+    } catch (error) {
+      console.error("Error logging out", error);
+    }
+  }, [supabase]);
+
   return (
     <IonPage>
       <DashboardHeader />
 
+      {/* Dashboard Menu */}
       <IonMenu
         swipeGesture={true}
         type="overlay"
@@ -29,6 +50,24 @@ const DashboardOutlet: React.FC = () => {
           <IonToolbar>
             <IonTitle>Dashboard</IonTitle>
           </IonToolbar>
+          <IonList>
+            <IonItem
+              onClick={() => {
+                console.log("Logging out");
+                // const token = supabase.auth.getSession().then((session) => {
+                //   return session.data.session?.access_token;
+                // });
+                supabase.auth.signOut({ scope: "global" }).then(() => {
+                  console.log("Logged out");
+                  history.push("/login");
+                });
+              }}
+              //  onClick={handleLogout}
+              button={true}
+            >
+              Logout
+            </IonItem>
+          </IonList>
         </IonHeader>
       </IonMenu>
 

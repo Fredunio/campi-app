@@ -21,12 +21,18 @@ import {
   searchCircleOutline,
   searchOutline,
 } from "ionicons/icons";
-import useAuth from "../../hooks/useAuth/useAuth";
 import { IonReactRouter } from "@ionic/react-router";
 import Map from "../../pages/Map";
 import DashboardOutlet from "../../pages/Dashboard/DashboardOutlet";
 import AddOutlet from "../../pages/Add/AddOutlet";
 import Search from "../../pages/Search";
+import { Capacitor } from "@capacitor/core";
+import ProtectedAuthRoute from "@/components/Router/ProtectedAuthRoute";
+import Avatar from "boring-avatars";
+import UserAvatar from "@/components/Avatars/UserAvatar/UserAvatar";
+import useAuth from "@/hooks/useAuth/useAuth";
+
+const isNative = Capacitor.isNativePlatform();
 
 const tabs = [
   {
@@ -73,10 +79,10 @@ export default function RouterWithTabs() {
           
           Use the component prop when your component depends on the RouterComponentProps passed in automatically.
         */}
-          {/* <Route path="/dashboard" component={DashboardOutlet} /> */}
-          <Route path="/dashboard" render={() => <DashboardOutlet />} />
+          {/* <Route path="/dashboard" render={() => <DashboardOutlet />} /> */}
+          <ProtectedAuthRoute path="/dashboard" component={DashboardOutlet} />
           <Route path="/map" render={() => <Map />} />
-          <Route path="/add" render={() => <AddOutlet />} />
+          <ProtectedAuthRoute path="/add" component={AddOutlet} />
           <Route path="/search" render={() => <Search />} />
           <Route path="/journal" render={() => <Journal />} />
           <Route path="/login" render={() => <Login />} />
@@ -84,7 +90,7 @@ export default function RouterWithTabs() {
         </IonRouterOutlet>
 
         {/* FIXME: fix home tab is always styled active (probable because there is a '/' route, and it picks up all other routes )*/}
-        <IonTabBar color={"light"} slot="bottom">
+        <IonTabBar slot="bottom">
           {tabs.map((tab) => (
             <IonTabButton
               // selected={url === tab.href}
@@ -97,12 +103,19 @@ export default function RouterWithTabs() {
             </IonTabButton>
           ))}
           <IonTabButton tab="dashboard" href={user ? "/dashboard" : "/login"}>
-            <IonAvatar className="w-12 h-12">
+            <UserAvatar
+              colors={null}
+              variant="beam"
+              name={user?.email || ""}
+              size={40}
+            />
+
+            {/* <IonAvatar className="w-12 h-12">
               <img
                 alt="Silhouette of a person's head"
                 src="https://ionicframework.com/docs/img/demos/avatar.svg"
               />
-            </IonAvatar>
+            </IonAvatar> */}
           </IonTabButton>
         </IonTabBar>
       </IonTabs>

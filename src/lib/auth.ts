@@ -8,6 +8,9 @@ export async function signUpWithEmail(
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
+    // options:{
+    //  emailRedirectTo:
+    // }
   });
 
   if (error) {
@@ -54,7 +57,6 @@ export async function signInWithDiscord(supabaseClient: TypedSupabaseClient) {
 
 export async function signOut(supabaseClient: TypedSupabaseClient) {
   const { error } = await supabaseClient.auth.signOut();
-
   if (error) {
     throw error;
   }

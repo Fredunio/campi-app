@@ -1,10 +1,10 @@
 import { IonContent, IonPage } from "@ionic/react";
-import HomeHeader from "../components/Layout/Headers/HomeHeader/HomeHeader";
+import JournalHeader from "@/components/Layout/Headers/JournalHeader/JournalHeader";
 
 const Journal: React.FC = () => {
   return (
     <IonPage>
-      <HomeHeader />
+      <JournalHeader />
       <IonContent fullscreen></IonContent>
     </IonPage>
   );

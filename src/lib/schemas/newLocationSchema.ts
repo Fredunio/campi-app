@@ -1,5 +1,5 @@
 import {
-  IMAGE_EXTENSIONS,
+  IMAGE_MIME_TYPES,
   MAX_LOCATION_IMAGES,
   MAX_LOCATION_IMAGES_SIZE_BYTES,
 } from "@/lib/constants";
@@ -27,7 +27,7 @@ export const newLocationSchema = yup.object().shape({
         for (let i = 0; i < fileArray.length; i++) {
           const file = fileArray[i];
           const extension = getFileExtension(file.name);
-          if (!extension || !IMAGE_EXTENSIONS.includes(extension)) {
+          if (!extension || !IMAGE_MIME_TYPES.includes(extension)) {
             context?.createError();
             break;
           }
